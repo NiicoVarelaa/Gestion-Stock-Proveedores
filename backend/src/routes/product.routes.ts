@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import express, { Router } from 'express';
 import { ProductController } from '../controllers/product.controller';
 import { validate } from '../middlewares/validate';
 import {
@@ -8,7 +8,7 @@ import {
   listProductsSchema,
 } from '../routes/product.schema';
 
-const router = Router();
+const router: express.Router = Router();
 const controller = new ProductController();
 
 router.post('/', validate(createProductSchema), controller.create.bind(controller));

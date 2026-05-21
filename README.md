@@ -15,6 +15,7 @@ Sistema de gestión de stock y proveedores desarrollado como proyecto de portfol
 
 ## Features
 
+- **Autenticación JWT**: Login/registro con protección de rutas
 - CRUD completo de Proveedores y Productos
 - Registro de movimientos de stock con **transacciones ACID**
 - Alertas de stock mínimo en tiempo real
@@ -133,6 +134,7 @@ mini-erp/
 4. Agregar variables de entorno:
    - `DATABASE_URL`: Tu conexión directa de Supabase (puerto 5432)
    - `FRONTEND_URL`: La URL de tu frontend en Vercel
+   - `JWT_SECRET`: Una clave secreta para firmar los tokens JWT
 5. Ejecutar migraciones manualmente:
    ```bash
    npx prisma migrate deploy

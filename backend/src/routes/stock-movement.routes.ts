@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import express, { Router } from 'express';
 import { StockMovementController } from '../controllers/stock-movement.controller';
 import { validate } from '../middlewares/validate';
 import {
@@ -7,7 +7,7 @@ import {
   listMovementsSchema,
 } from '../routes/stock-movement.schema';
 
-const router = Router();
+const router: express.Router = Router();
 const controller = new StockMovementController();
 
 router.post('/', validate(createMovementSchema), controller.create.bind(controller));
