@@ -46,20 +46,20 @@ Routes → Controllers → Services → Prisma Models
 
 ```bash
 cd backend
-npm install
+pnpm install
 cp .env.example .env  # Configurar DATABASE_URL con tu conexión de Supabase
 npx prisma generate
 npx prisma migrate dev
-npm run dev
+pnpm run dev
 ```
 
 ### Frontend
 
 ```bash
 cd frontend
-npm install
+pnpm install
 cp .env.example .env
-npm run dev
+pnpm run dev
 ```
 
 ## Endpoints Principales
@@ -119,3 +119,32 @@ mini-erp/
 ## Autor
 
 [Tu Nombre](https://github.com/tu-usuario)
+
+## Deploy
+
+### Backend en Render
+
+1. Crear un nuevo **Web Service** en [Render](https://render.com)
+2. Conectar el repositorio de GitHub
+3. Configurar:
+   - **Root Directory:** `backend`
+   - **Build Command:** `pnpm install && pnpm run build`
+   - **Start Command:** `node dist/server.js`
+4. Agregar variables de entorno:
+   - `DATABASE_URL`: Tu conexión directa de Supabase (puerto 5432)
+   - `FRONTEND_URL`: La URL de tu frontend en Vercel
+5. Ejecutar migraciones manualmente:
+   ```bash
+   npx prisma migrate deploy
+   ```
+
+### Frontend en Vercel
+
+1. Importar el repositorio en [Vercel](https://vercel.com)
+2. Configurar:
+   - **Root Directory:** `frontend`
+   - **Framework Preset:** Vite
+   - **Build Command:** `pnpm install && pnpm run build`
+   - **Output Directory:** `dist`
+3. Agregar variable de entorno:
+   - `VITE_API_URL`: La URL de tu backend en Render (ej: `https://mini-erp-api.onrender.com/api`)

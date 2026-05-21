@@ -1,0 +1,57 @@
+import { create } from 'zustand';
+import api from '@/services/api';
+import type { Product } from '@/types';
+
+interface ProductStore {
+  products: Product[];
+  lowStock: Product[];
+  loading: boolean;
+  fetchProducts: (params?: { page?: number; limit?: number; category?: string; supplierId?: string; search?: string }) => Promise<void>;
+  fetchLowStock: () => Promise<void>;
+  createProduct: (data: { name: string; category: string; price: number; minStock?: number; supplierId: string }) => Promise<void>;
+  updateProduct: (id: string, data: { name?: string; category?: string; price?: number; minStock?: number; supplierId?: string }) => Promise<void>;
+  deleteProduct: (id: string) => Promise<void>;
+}
+
+export const useProductStore = create<ProductStore>((set, get) => ({
+  products: [],
+  lowStock: [],
+  loading: false,
+
+  fetchProducts: async (params = {}) => {
+    set({ loading: true });
+    try {
+      const { data } = await api.get('/products', { params });
+      set({ products: data.data || [] });
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  fetchLowStock: async () => {
+    try {
+      const { data } = await api.get('/products/low-stock');
+      set({ lowStock: data.data || [] });
+    } catch {
+      set({ lowStock: [] });
+    }
+  },
+
+  createProduct: async (data) => {
+    await api.post('/products', data);
+    await get().fetchProducts();
+    await get().fetchLowStock();
+  },
+
+  updateProduct: async (id, data) => {
+    await api.put(`/products/${id}`, data);
+    await get().fetchProducts();
+    await get().fetchLowStock();
+  },
+
+  deleteProduct: async (id) => {
+    await api.delete(`/products/${id}`);
+    await get().fetchProducts();
+    await get().fetchLowStock();
+  },
+}));
