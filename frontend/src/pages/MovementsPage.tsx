@@ -42,6 +42,22 @@ const movementSchema = z.object({
 
 type FormData = z.infer<typeof movementSchema>;
 
+function TableSkeleton() {
+  return (
+    <>
+      {Array.from({ length: 3 }).map((_, i) => (
+        <TableRow key={i}>
+          <TableCell><div className="h-4 w-32 bg-gray-200 rounded animate-pulse" /></TableCell>
+          <TableCell><div className="h-5 w-16 bg-gray-200 rounded animate-pulse" /></TableCell>
+          <TableCell><div className="h-4 w-10 bg-gray-200 rounded animate-pulse" /></TableCell>
+          <TableCell><div className="h-4 w-24 bg-gray-200 rounded animate-pulse" /></TableCell>
+          <TableCell><div className="h-4 w-28 bg-gray-200 rounded animate-pulse" /></TableCell>
+        </TableRow>
+      ))}
+    </>
+  );
+}
+
 export default function MovementsPage() {
   const { movements, loading, fetchMovements, createMovement } = useMovementStore();
   const { products, fetchProducts } = useProductStore();
@@ -151,28 +167,38 @@ export default function MovementsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {movements.map((movement) => (
-              <TableRow key={movement.id}>
-                <TableCell className="font-medium">{movement.product.name}</TableCell>
-                <TableCell>
-                  <Badge variant={movement.type === 'IN' ? 'default' : 'destructive'} className="gap-1">
-                    {movement.type === 'IN' ? (
-                      <ArrowUpRight className="h-3 w-3" />
-                    ) : (
-                      <ArrowDownRight className="h-3 w-3" />
-                    )}
-                    {movement.type === 'IN' ? 'Entrada' : 'Salida'}
-                  </Badge>
-                </TableCell>
-                <TableCell className={movement.type === 'IN' ? 'text-green-600' : 'text-orange-600'}>
-                  {movement.type === 'IN' ? '+' : '-'}{movement.quantity}
-                </TableCell>
-                <TableCell>{movement.reason || '-'}</TableCell>
-                <TableCell className="text-sm text-gray-500">
-                  {new Date(movement.createdAt).toLocaleString()}
+            {loading ? (
+              <TableSkeleton />
+            ) : movements.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center text-gray-500 py-8">
+                  No hay movimientos registrados
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              movements.map((movement) => (
+                <TableRow key={movement.id}>
+                  <TableCell className="font-medium">{movement.product.name}</TableCell>
+                  <TableCell>
+                    <Badge variant={movement.type === 'IN' ? 'default' : 'destructive'} className="gap-1">
+                      {movement.type === 'IN' ? (
+                        <ArrowUpRight className="h-3 w-3" />
+                      ) : (
+                        <ArrowDownRight className="h-3 w-3" />
+                      )}
+                      {movement.type === 'IN' ? 'Entrada' : 'Salida'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className={movement.type === 'IN' ? 'text-green-600' : 'text-orange-600'}>
+                    {movement.type === 'IN' ? '+' : '-'}{movement.quantity}
+                  </TableCell>
+                  <TableCell>{movement.reason || '-'}</TableCell>
+                  <TableCell className="text-sm text-gray-500">
+                    {new Date(movement.createdAt).toLocaleString()}
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>

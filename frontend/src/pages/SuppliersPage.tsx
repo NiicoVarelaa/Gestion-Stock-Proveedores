@@ -35,6 +35,22 @@ const supplierSchema = z.object({
 
 type FormData = z.infer<typeof supplierSchema>;
 
+function TableSkeleton() {
+  return (
+    <>
+      {Array.from({ length: 3 }).map((_, i) => (
+        <TableRow key={i}>
+          <TableCell><div className="h-4 w-32 bg-gray-200 rounded animate-pulse" /></TableCell>
+          <TableCell><div className="h-4 w-40 bg-gray-200 rounded animate-pulse" /></TableCell>
+          <TableCell><div className="h-4 w-24 bg-gray-200 rounded animate-pulse" /></TableCell>
+          <TableCell><div className="h-5 w-14 bg-gray-200 rounded animate-pulse" /></TableCell>
+          <TableCell><div className="h-8 w-16 bg-gray-200 rounded animate-pulse ml-auto" /></TableCell>
+        </TableRow>
+      ))}
+    </>
+  );
+}
+
 export default function SuppliersPage() {
   const { suppliers, loading, fetchSuppliers, createSupplier, updateSupplier, deactivateSupplier } = useSupplierStore();
   const [open, setOpen] = useState(false);
@@ -76,6 +92,7 @@ export default function SuppliersPage() {
   };
 
   const handleDeactivate = async (id: string) => {
+    if (!window.confirm('¿Estás seguro de que deseas desactivar este proveedor?')) return;
     try {
       await deactivateSupplier(id);
       toast.success('Proveedor desactivado');
@@ -142,30 +159,40 @@ export default function SuppliersPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {suppliers.map((supplier) => (
-              <TableRow key={supplier.id}>
-                <TableCell className="font-medium">{supplier.name}</TableCell>
-                <TableCell>{supplier.email}</TableCell>
-                <TableCell>{supplier.phone || '-'}</TableCell>
-                <TableCell>
-                  <Badge variant={supplier.active ? 'default' : 'destructive'}>
-                    {supplier.active ? 'Activo' : 'Inactivo'}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    <Button variant="ghost" size="icon" onClick={() => handleOpen(supplier)}>
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    {supplier.active && (
-                      <Button variant="ghost" size="icon" onClick={() => handleDeactivate(supplier.id)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
+            {loading ? (
+              <TableSkeleton />
+            ) : suppliers.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center text-gray-500 py-8">
+                  No hay proveedores registrados
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              suppliers.map((supplier) => (
+                <TableRow key={supplier.id}>
+                  <TableCell className="font-medium">{supplier.name}</TableCell>
+                  <TableCell>{supplier.email}</TableCell>
+                  <TableCell>{supplier.phone || '-'}</TableCell>
+                  <TableCell>
+                    <Badge variant={supplier.active ? 'default' : 'destructive'}>
+                      {supplier.active ? 'Activo' : 'Inactivo'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-2">
+                      <Button variant="ghost" size="icon" onClick={() => handleOpen(supplier)}>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      {supplier.active && (
+                        <Button variant="ghost" size="icon" onClick={() => handleDeactivate(supplier.id)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>

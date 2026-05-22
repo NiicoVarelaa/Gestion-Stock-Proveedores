@@ -29,19 +29,26 @@ export default function LoginPage() {
   const { login, register: registerUser, loading } = useAuthStore();
   const navigate = useNavigate();
 
-  const form = useForm<LoginFormData | RegisterFormData>({
-    resolver: zodResolver(isRegister ? registerSchema : loginSchema),
+  const loginForm = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: '', password: '' },
+  });
+
+  const registerForm = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
     defaultValues: { email: '', password: '', name: '' },
   });
+
 
   const onSubmit = async (data: LoginFormData | RegisterFormData) => {
     try {
       if (isRegister) {
-        const { name } = data as RegisterFormData;
-        await registerUser(data.email, data.password, name);
+        const { name, email, password } = data as RegisterFormData;
+        await registerUser(email, password, name);
         toast.success('Cuenta creada exitosamente');
       } else {
-        await login(data.email, data.password);
+        const { email, password } = data as LoginFormData;
+        await login(email, password);
         toast.success('Bienvenido');
       }
       navigate('/');
@@ -64,30 +71,32 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={isRegister ? registerForm.handleSubmit(onSubmit) : loginForm.handleSubmit(onSubmit)} className="space-y-4">
             {isRegister && (
               <div className="space-y-2">
                 <Label>Nombre</Label>
-                <Input {...form.register('name' as never)} placeholder="Tu nombre" />
-                {(form.formState.errors as Record<string, { message?: string }>)?.name && (
-                  <p className="text-sm text-red-500">
-                    {(form.formState.errors as Record<string, { message?: string }>)?.name?.message}
-                  </p>
+                <Input {...registerForm.register('name')} placeholder="Tu nombre" />
+                {registerForm.formState.errors.name && (
+                  <p className="text-sm text-red-500">{registerForm.formState.errors.name.message}</p>
                 )}
               </div>
             )}
             <div className="space-y-2">
               <Label>Email</Label>
-              <Input {...form.register('email')} type="email" placeholder="tu@email.com" />
-              {form.formState.errors.email && (
-                <p className="text-sm text-red-500">{form.formState.errors.email.message}</p>
+              <Input {...(isRegister ? registerForm.register('email') : loginForm.register('email'))} type="email" placeholder="tu@email.com" />
+              {(isRegister ? registerForm.formState.errors.email : loginForm.formState.errors.email) && (
+                <p className="text-sm text-red-500">
+                  {(isRegister ? registerForm.formState.errors.email : loginForm.formState.errors.email)?.message}
+                </p>
               )}
             </div>
             <div className="space-y-2">
               <Label>Contraseña</Label>
-              <Input {...form.register('password')} type="password" placeholder="••••••••" />
-              {form.formState.errors.password && (
-                <p className="text-sm text-red-500">{form.formState.errors.password.message}</p>
+              <Input {...(isRegister ? registerForm.register('password') : loginForm.register('password'))} type="password" placeholder="••••••••" />
+              {(isRegister ? registerForm.formState.errors.password : loginForm.formState.errors.password) && (
+                <p className="text-sm text-red-500">
+                  {(isRegister ? registerForm.formState.errors.password : loginForm.formState.errors.password)?.message}
+                </p>
               )}
             </div>
             <Button type="submit" className="w-full" disabled={loading}>

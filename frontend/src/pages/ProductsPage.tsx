@@ -44,6 +44,23 @@ const productSchema = z.object({
 
 type FormData = z.infer<typeof productSchema>;
 
+function TableSkeleton() {
+  return (
+    <>
+      {Array.from({ length: 3 }).map((_, i) => (
+        <TableRow key={i}>
+          <TableCell><div className="h-4 w-32 bg-gray-200 rounded animate-pulse" /></TableCell>
+          <TableCell><div className="h-4 w-20 bg-gray-200 rounded animate-pulse" /></TableCell>
+          <TableCell><div className="h-4 w-16 bg-gray-200 rounded animate-pulse" /></TableCell>
+          <TableCell><div className="h-5 w-10 bg-gray-200 rounded animate-pulse" /></TableCell>
+          <TableCell><div className="h-4 w-24 bg-gray-200 rounded animate-pulse" /></TableCell>
+          <TableCell><div className="h-8 w-16 bg-gray-200 rounded animate-pulse ml-auto" /></TableCell>
+        </TableRow>
+      ))}
+    </>
+  );
+}
+
 export default function ProductsPage() {
   const { products, loading, fetchProducts, fetchLowStock, createProduct, updateProduct, deleteProduct } = useProductStore();
   const { suppliers, fetchSuppliers } = useSupplierStore();
@@ -94,6 +111,7 @@ export default function ProductsPage() {
   };
 
   const handleDelete = async (id: string) => {
+    if (!window.confirm('¿Estás seguro de que deseas eliminar este producto?')) return;
     try {
       await deleteProduct(id);
       toast.success('Producto eliminado');
@@ -191,32 +209,42 @@ export default function ProductsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {products.map((product) => {
-              const low = isLowStock(product);
-              return (
-                <TableRow key={product.id}>
-                  <TableCell className="font-medium">{product.name}</TableCell>
-                  <TableCell>{product.category}</TableCell>
-                  <TableCell>${Number(product.price).toFixed(2)}</TableCell>
-                  <TableCell>
-                    <Badge variant={low ? 'destructive' : 'secondary'}>
-                      {product.stock}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{product.supplier.name}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button variant="ghost" size="icon" onClick={() => handleOpen(product)}>
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleDelete(product.id)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
+            {loading ? (
+              <TableSkeleton />
+            ) : products.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="text-center text-gray-500 py-8">
+                  No hay productos registrados
+                </TableCell>
+              </TableRow>
+            ) : (
+              products.map((product) => {
+                const low = isLowStock(product);
+                return (
+                  <TableRow key={product.id}>
+                    <TableCell className="font-medium">{product.name}</TableCell>
+                    <TableCell>{product.category}</TableCell>
+                    <TableCell>${Number(product.price).toFixed(2)}</TableCell>
+                    <TableCell>
+                      <Badge variant={low ? 'destructive' : 'secondary'}>
+                        {product.stock}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{product.supplier.name}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button variant="ghost" size="icon" onClick={() => handleOpen(product)}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => handleDelete(product.id)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            )}
           </TableBody>
         </Table>
       </div>
