@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { AuthService } from '../services/auth.service';
+import { AuthService, setAuthCookie, clearAuthCookie } from '../services/auth.service';
 
 const authService = new AuthService();
 
@@ -8,7 +8,8 @@ export class AuthController {
     try {
       const { email, password, name } = req.body;
       const result = await authService.register(email, password, name);
-      res.status(201).json({ success: true, data: result });
+      setAuthCookie(res, result.token);
+      res.status(201).json({ success: true, data: { user: result.user } });
     } catch (error) {
       next(error);
     }
@@ -18,9 +19,15 @@ export class AuthController {
     try {
       const { email, password } = req.body;
       const result = await authService.login(email, password);
-      res.json({ success: true, data: result });
+      setAuthCookie(res, result.token);
+      res.json({ success: true, data: { user: result.user } });
     } catch (error) {
       next(error);
     }
+  }
+
+  async logout(req: Request, res: Response) {
+    clearAuthCookie(res);
+    res.json({ success: true, message: 'Sesión cerrada' });
   }
 }

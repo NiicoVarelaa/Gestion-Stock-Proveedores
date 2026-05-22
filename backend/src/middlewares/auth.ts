@@ -13,12 +13,12 @@ export interface AuthRequest extends Request {
 }
 
 export const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
-  const header = req.headers.authorization;
-  if (!header?.startsWith('Bearer ')) {
+  const token = req.cookies?.auth_token || req.headers.cookie?.match(/auth_token=([^;]+)/)?.[1];
+
+  if (!token) {
     throw new AppError('Token no proporcionado', 401);
   }
 
-  const token = header.split(' ')[1];
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as { id: string; email: string; role: string };
     req.user = decoded;

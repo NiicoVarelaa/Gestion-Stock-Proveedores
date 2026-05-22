@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'change-this-in-production';
+const COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
 
 export class AuthService {
   async register(email: string, password: string, name: string) {
@@ -35,4 +36,18 @@ export class AuthService {
 
     return { user: { id: user.id, email: user.email, name: user.name, role: user.role }, token };
   }
+}
+
+export function setAuthCookie(res: any, token: string) {
+  res.cookie('auth_token', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    maxAge: COOKIE_MAX_AGE,
+    path: '/',
+  });
+}
+
+export function clearAuthCookie(res: any) {
+  res.clearCookie('auth_token', { path: '/' });
 }

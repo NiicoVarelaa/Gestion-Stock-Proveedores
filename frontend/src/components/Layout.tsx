@@ -1,6 +1,7 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Package, Truck, ArrowLeftRight, LayoutDashboard, LogOut, User } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
+import { Button } from '@/components/ui/button';
 
 const navItems = [
   { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
@@ -47,13 +48,14 @@ export default function Layout() {
               <p className="text-xs text-gray-500 truncate">{user?.email}</p>
             </div>
           </div>
-          <button
-            onClick={logout}
-            className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+          <Button
+            variant="ghost"
+            className="w-full justify-start text-red-600 hover:bg-red-50 hover:text-red-700"
+            onClick={() => logout()}
           >
-            <LogOut className="h-4 w-4" />
+            <LogOut className="h-4 w-4 mr-2" />
             Cerrar Sesión
-          </button>
+          </Button>
         </div>
       </aside>
       <main className="flex-1 overflow-auto p-8">
