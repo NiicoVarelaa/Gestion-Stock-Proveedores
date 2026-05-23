@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -7,6 +7,7 @@ import { useSupplierStore } from '@/store/supplier.store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { FormFieldError } from '@/components/FormFieldError';
 import {
   Dialog,
   DialogContent,
@@ -30,7 +31,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+  Search,
+} from 'lucide-react';
 import { toast } from 'sonner';
 import type { Product } from '@/types';
 
@@ -62,21 +70,39 @@ function TableSkeleton() {
 }
 
 export default function ProductsPage() {
-  const { products, loading, fetchProducts, fetchLowStock, createProduct, updateProduct, deleteProduct } = useProductStore();
+  const { products, total, loading, fetchProducts, fetchLowStock, createProduct, updateProduct, deleteProduct } = useProductStore();
   const { suppliers, fetchSuppliers } = useSupplierStore();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState('');
+  const [category, setCategory] = useState('');
+  const limit = 10;
 
   const form = useForm<FormData>({
     resolver: zodResolver(productSchema),
     defaultValues: { name: '', category: '', price: 0, minStock: 5, supplierId: '' },
   });
 
+  const categories = useMemo(
+    () => [...new Set(products.map((p) => p.category))].sort(),
+    [products]
+  );
+
+  const loadData = () => {
+    fetchProducts({
+      page,
+      limit,
+      search: search || undefined,
+      category: category || undefined,
+    });
+  };
+
   useEffect(() => {
-    fetchProducts();
+    loadData();
     fetchLowStock();
     fetchSuppliers({ limit: 100 });
-  }, []);
+  }, [page, search, category]);
 
   const handleOpen = (product?: Product) => {
     if (product) {
@@ -105,6 +131,7 @@ export default function ProductsPage() {
         toast.success('Producto creado');
       }
       setOpen(false);
+      loadData();
     } catch {
       toast.error('Error al guardar producto');
     }
@@ -115,12 +142,18 @@ export default function ProductsPage() {
     try {
       await deleteProduct(id);
       toast.success('Producto eliminado');
+      loadData();
     } catch {
       toast.error('Error al eliminar producto');
     }
   };
 
-  const isLowStock = (product: Product) => product.stock <= product.minStock;
+  const isLowStock = useMemo(
+    () => (product: Product) => product.stock <= product.minStock,
+    []
+  );
+
+  const totalPages = Math.ceil(total / limit);
 
   return (
     <div className="space-y-6">
@@ -141,24 +174,18 @@ export default function ProductsPage() {
               <div className="space-y-2">
                 <Label>Nombre</Label>
                 <Input {...form.register('name')} />
-                {form.formState.errors.name && (
-                  <p className="text-sm text-red-500">{form.formState.errors.name.message}</p>
-                )}
+                <FormFieldError error={form.formState.errors.name} />
               </div>
               <div className="space-y-2">
                 <Label>Categoría</Label>
                 <Input {...form.register('category')} />
-                {form.formState.errors.category && (
-                  <p className="text-sm text-red-500">{form.formState.errors.category.message}</p>
-                )}
+                <FormFieldError error={form.formState.errors.category} />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Precio</Label>
                   <Input {...form.register('price')} type="number" step="0.01" />
-                  {form.formState.errors.price && (
-                    <p className="text-sm text-red-500">{form.formState.errors.price.message}</p>
-                  )}
+                  <FormFieldError error={form.formState.errors.price} />
                 </div>
                 <div className="space-y-2">
                   <Label>Stock Mínimo</Label>
@@ -184,9 +211,7 @@ export default function ProductsPage() {
                       ))}
                   </SelectContent>
                 </Select>
-                {form.formState.errors.supplierId && (
-                  <p className="text-sm text-red-500">{form.formState.errors.supplierId.message}</p>
-                )}
+                <FormFieldError error={form.formState.errors.supplierId} />
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
                 {editing ? 'Actualizar' : 'Crear'}
@@ -194,6 +219,28 @@ export default function ProductsPage() {
             </form>
           </DialogContent>
         </Dialog>
+      </div>
+
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 flex-1 max-w-sm">
+          <Search className="h-4 w-4 text-gray-400" />
+          <Input
+            placeholder="Buscar producto..."
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          />
+        </div>
+        <Select value={category} onValueChange={(v) => { setCategory(v); setPage(1); }}>
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="Todas las categorías" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">Todas las categorías</SelectItem>
+            {categories.map((cat) => (
+              <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="rounded-md border">
@@ -248,6 +295,35 @@ export default function ProductsPage() {
           </TableBody>
         </Table>
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-gray-500">
+            Mostrando {products.length} de {total} productos
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page === 1}
+              onClick={() => setPage((p) => p - 1)}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span className="text-sm text-gray-700">
+              Página {page} de {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page === totalPages}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

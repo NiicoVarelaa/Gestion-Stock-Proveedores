@@ -6,6 +6,7 @@ import { useSupplierStore } from '@/store/supplier.store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { FormFieldError } from '@/components/FormFieldError';
 import {
   Dialog,
   DialogContent,
@@ -22,7 +23,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Supplier } from '@/types';
 
@@ -55,15 +56,25 @@ export default function SuppliersPage() {
   const { suppliers, loading, fetchSuppliers, createSupplier, updateSupplier, deactivateSupplier } = useSupplierStore();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Supplier | null>(null);
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState('');
+  const [total, setTotal] = useState(0);
+  const limit = 10;
 
   const form = useForm<FormData>({
     resolver: zodResolver(supplierSchema),
     defaultValues: { name: '', email: '', phone: '', address: '' },
   });
 
+  const loadData = () => {
+    fetchSuppliers({ page, limit, search: search || undefined }).then((res) => {
+      if (res?.total !== undefined) setTotal(res.total);
+    });
+  };
+
   useEffect(() => {
-    fetchSuppliers();
-  }, []);
+    loadData();
+  }, [page, search]);
 
   const handleOpen = (supplier?: Supplier) => {
     if (supplier) {
@@ -86,6 +97,7 @@ export default function SuppliersPage() {
         toast.success('Proveedor creado');
       }
       setOpen(false);
+      loadData();
     } catch {
       toast.error('Error al guardar proveedor');
     }
@@ -96,10 +108,13 @@ export default function SuppliersPage() {
     try {
       await deactivateSupplier(id);
       toast.success('Proveedor desactivado');
+      loadData();
     } catch {
       toast.error('Error al desactivar proveedor');
     }
   };
+
+  const totalPages = Math.ceil(total / limit);
 
   return (
     <div className="space-y-6">
@@ -120,16 +135,12 @@ export default function SuppliersPage() {
               <div className="space-y-2">
                 <Label>Nombre</Label>
                 <Input {...form.register('name')} />
-                {form.formState.errors.name && (
-                  <p className="text-sm text-red-500">{form.formState.errors.name.message}</p>
-                )}
+                <FormFieldError error={form.formState.errors.name} />
               </div>
               <div className="space-y-2">
                 <Label>Email</Label>
                 <Input {...form.register('email')} type="email" />
-                {form.formState.errors.email && (
-                  <p className="text-sm text-red-500">{form.formState.errors.email.message}</p>
-                )}
+                <FormFieldError error={form.formState.errors.email} />
               </div>
               <div className="space-y-2">
                 <Label>Teléfono</Label>
@@ -145,6 +156,16 @@ export default function SuppliersPage() {
             </form>
           </DialogContent>
         </Dialog>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <Search className="h-4 w-4 text-gray-400" />
+        <Input
+          placeholder="Buscar por nombre o email..."
+          value={search}
+          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          className="max-w-sm"
+        />
       </div>
 
       <div className="rounded-md border">
@@ -196,6 +217,35 @@ export default function SuppliersPage() {
           </TableBody>
         </Table>
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-gray-500">
+            Mostrando {suppliers.length} de {total} proveedores
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page === 1}
+              onClick={() => setPage((p) => p - 1)}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span className="text-sm text-gray-700">
+              Página {page} de {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page === totalPages}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

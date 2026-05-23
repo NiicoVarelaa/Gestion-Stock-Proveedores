@@ -5,16 +5,28 @@ import type { User } from '@/types';
 interface AuthStore {
   user: User | null;
   loading: boolean;
+  initialized: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
+  initialize: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthStore>((set) => ({
   user: null,
   loading: false,
+  initialized: false,
   isAuthenticated: false,
+
+  initialize: async () => {
+    try {
+      const { data } = await api.get('/auth/me');
+      set({ user: data.data.user, isAuthenticated: true, initialized: true });
+    } catch {
+      set({ initialized: true });
+    }
+  },
 
   login: async (email: string, password: string) => {
     set({ loading: true });

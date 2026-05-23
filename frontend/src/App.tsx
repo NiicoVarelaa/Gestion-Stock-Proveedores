@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import Layout from '@/components/Layout';
@@ -7,8 +8,15 @@ import Dashboard from '@/pages/Dashboard';
 import SuppliersPage from '@/pages/SuppliersPage';
 import ProductsPage from '@/pages/ProductsPage';
 import MovementsPage from '@/pages/MovementsPage';
+import { useAuthStore } from '@/store/auth.store';
 
 function App() {
+  const initialize = useAuthStore((state) => state.initialize);
+
+  useEffect(() => {
+    initialize();
+  }, []);
+
   return (
     <ErrorBoundary>
       <BrowserRouter>

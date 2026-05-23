@@ -4,9 +4,10 @@ import type { Supplier } from '@/types';
 
 interface SupplierStore {
   suppliers: Supplier[];
+  total: number;
   loading: boolean;
   error: string | null;
-  fetchSuppliers: (params?: { page?: number; limit?: number; search?: string }) => Promise<void>;
+  fetchSuppliers: (params?: { page?: number; limit?: number; search?: string }) => Promise<{ total: number }>;
   createSupplier: (data: { name: string; email: string; phone?: string; address?: string }) => Promise<void>;
   updateSupplier: (id: string, data: { name?: string; email?: string; phone?: string; address?: string }) => Promise<void>;
   deactivateSupplier: (id: string) => Promise<void>;
@@ -14,6 +15,7 @@ interface SupplierStore {
 
 export const useSupplierStore = create<SupplierStore>((set, get) => ({
   suppliers: [],
+  total: 0,
   loading: false,
   error: null,
 
@@ -21,7 +23,8 @@ export const useSupplierStore = create<SupplierStore>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const { data } = await api.get('/suppliers', { params });
-      set({ suppliers: data.data || [] });
+      set({ suppliers: data.data || [], total: data.total || 0 });
+      return { total: data.total || 0 };
     } catch (err) {
       set({ error: 'Error al cargar proveedores' });
       throw err;

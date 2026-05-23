@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useProductStore } from '@/store/product.store';
 import { useMovementStore } from '@/store/movement.store';
 import { useSupplierStore } from '@/store/supplier.store';
@@ -31,12 +31,14 @@ export default function Dashboard() {
 
   const isLoading = loadingProducts || loadingMovements || loadingSuppliers;
 
-  const totalIn = movements
-    .filter((m) => m.type === 'IN')
-    .reduce((sum, m) => sum + m.quantity, 0);
-  const totalOut = movements
-    .filter((m) => m.type === 'OUT')
-    .reduce((sum, m) => sum + m.quantity, 0);
+  const totalIn = useMemo(
+    () => movements.filter((m) => m.type === 'IN').reduce((sum, m) => sum + m.quantity, 0),
+    [movements]
+  );
+  const totalOut = useMemo(
+    () => movements.filter((m) => m.type === 'OUT').reduce((sum, m) => sum + m.quantity, 0),
+    [movements]
+  );
 
   return (
     <div className="space-y-6">

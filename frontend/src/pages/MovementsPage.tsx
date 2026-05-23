@@ -7,6 +7,7 @@ import { useProductStore } from '@/store/product.store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { FormFieldError } from '@/components/FormFieldError';
 import {
   Dialog,
   DialogContent,
@@ -30,7 +31,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Plus, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import {
+  Plus,
+  ArrowUpRight,
+  ArrowDownRight,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react';
 import { toast } from 'sonner';
 
 const movementSchema = z.object({
@@ -59,19 +66,30 @@ function TableSkeleton() {
 }
 
 export default function MovementsPage() {
-  const { movements, loading, fetchMovements, createMovement } = useMovementStore();
+  const { movements, total, loading, fetchMovements, createMovement } = useMovementStore();
   const { products, fetchProducts } = useProductStore();
   const [open, setOpen] = useState(false);
+  const [page, setPage] = useState(1);
+  const [typeFilter, setTypeFilter] = useState('');
+  const limit = 10;
 
   const form = useForm<FormData>({
     resolver: zodResolver(movementSchema),
     defaultValues: { type: 'IN', quantity: 0, productId: '', reason: '' },
   });
 
+  const loadData = () => {
+    fetchMovements({
+      page,
+      limit,
+      type: (typeFilter as 'IN' | 'OUT') || undefined,
+    });
+  };
+
   useEffect(() => {
-    fetchMovements();
+    loadData();
     fetchProducts({ limit: 100 });
-  }, []);
+  }, [page, typeFilter]);
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -79,10 +97,13 @@ export default function MovementsPage() {
       toast.success('Movimiento registrado');
       setOpen(false);
       form.reset({ type: 'IN', quantity: 0, productId: '', reason: '' });
+      loadData();
     } catch {
       toast.error('Error al registrar movimiento');
     }
   };
+
+  const totalPages = Math.ceil(total / limit);
 
   return (
     <div className="space-y-6">
@@ -132,16 +153,12 @@ export default function MovementsPage() {
                     ))}
                   </SelectContent>
                 </Select>
-                {form.formState.errors.productId && (
-                  <p className="text-sm text-red-500">{form.formState.errors.productId.message}</p>
-                )}
+                <FormFieldError error={form.formState.errors.productId} />
               </div>
               <div className="space-y-2">
                 <Label>Cantidad</Label>
                 <Input {...form.register('quantity')} type="number" min="1" />
-                {form.formState.errors.quantity && (
-                  <p className="text-sm text-red-500">{form.formState.errors.quantity.message}</p>
-                )}
+                <FormFieldError error={form.formState.errors.quantity} />
               </div>
               <div className="space-y-2">
                 <Label>Motivo (opcional)</Label>
@@ -153,6 +170,19 @@ export default function MovementsPage() {
             </form>
           </DialogContent>
         </Dialog>
+      </div>
+
+      <div className="flex items-center gap-4">
+        <Select value={typeFilter} onValueChange={(v) => { setTypeFilter(v); setPage(1); }}>
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="Todos los tipos" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">Todos los tipos</SelectItem>
+            <SelectItem value="IN">Entradas</SelectItem>
+            <SelectItem value="OUT">Salidas</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="rounded-md border">
@@ -202,6 +232,35 @@ export default function MovementsPage() {
           </TableBody>
         </Table>
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-gray-500">
+            Mostrando {movements.length} de {total} movimientos
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page === 1}
+              onClick={() => setPage((p) => p - 1)}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span className="text-sm text-gray-700">
+              Página {page} de {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={page === totalPages}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

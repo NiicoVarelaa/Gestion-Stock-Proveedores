@@ -1,5 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { AuthService, setAuthCookie, clearAuthCookie } from '../services/auth.service';
+import { AuthRequest } from '../middlewares/auth';
+import { prisma } from '../config/database';
+import { NotFoundError } from '../utils/errors';
 
 const authService = new AuthService();
 
@@ -29,5 +32,19 @@ export class AuthController {
   async logout(req: Request, res: Response) {
     clearAuthCookie(res);
     res.json({ success: true, message: 'Sesión cerrada' });
+  }
+
+  async me(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      if (!req.user) throw new NotFoundError('Usuario no encontrado');
+      const user = await prisma.user.findUnique({
+        where: { id: req.user.id },
+        select: { id: true, email: true, name: true, role: true },
+      });
+      if (!user) throw new NotFoundError('Usuario no encontrado');
+      res.json({ success: true, data: { user } });
+    } catch (error) {
+      next(error);
+    }
   }
 }

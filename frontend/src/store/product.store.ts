@@ -5,6 +5,7 @@ import type { Product } from '@/types';
 interface ProductStore {
   products: Product[];
   lowStock: Product[];
+  total: number;
   loading: boolean;
   error: string | null;
   fetchProducts: (params?: { page?: number; limit?: number; category?: string; supplierId?: string; search?: string }) => Promise<void>;
@@ -17,6 +18,7 @@ interface ProductStore {
 export const useProductStore = create<ProductStore>((set, get) => ({
   products: [],
   lowStock: [],
+  total: 0,
   loading: false,
   error: null,
 
@@ -24,7 +26,7 @@ export const useProductStore = create<ProductStore>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const { data } = await api.get('/products', { params });
-      set({ products: data.data || [] });
+      set({ products: data.data || [], total: data.total || 0 });
     } catch (err) {
       set({ error: 'Error al cargar productos' });
       throw err;

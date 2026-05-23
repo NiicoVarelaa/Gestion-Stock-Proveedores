@@ -4,6 +4,7 @@ import type { StockMovement } from '@/types';
 
 interface MovementStore {
   movements: StockMovement[];
+  total: number;
   loading: boolean;
   error: string | null;
   fetchMovements: (params?: { page?: number; limit?: number; productId?: string; type?: 'IN' | 'OUT'; from?: string; to?: string }) => Promise<void>;
@@ -12,6 +13,7 @@ interface MovementStore {
 
 export const useMovementStore = create<MovementStore>((set, get) => ({
   movements: [],
+  total: 0,
   loading: false,
   error: null,
 
@@ -19,7 +21,7 @@ export const useMovementStore = create<MovementStore>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const { data } = await api.get('/stock-movements', { params });
-      set({ movements: data.data || [] });
+      set({ movements: data.data || [], total: data.total || 0 });
     } catch (err) {
       set({ error: 'Error al cargar movimientos' });
       throw err;
