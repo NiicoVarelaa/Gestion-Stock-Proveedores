@@ -170,7 +170,7 @@ export default function ProductsPage() {
             <DialogHeader>
               <DialogTitle>{editing ? 'Editar Producto' : 'Nuevo Producto'}</DialogTitle>
             </DialogHeader>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} key={editing?.id || 'new'} className="space-y-4">
               <div className="space-y-2">
                 <Label>Nombre</Label>
                 <Input {...form.register('name')} />

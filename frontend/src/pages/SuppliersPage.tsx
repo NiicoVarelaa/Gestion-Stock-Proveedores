@@ -131,7 +131,7 @@ export default function SuppliersPage() {
             <DialogHeader>
               <DialogTitle>{editing ? 'Editar Proveedor' : 'Nuevo Proveedor'}</DialogTitle>
             </DialogHeader>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} key={editing?.id || 'new'} className="space-y-4">
               <div className="space-y-2">
                 <Label>Nombre</Label>
                 <Input {...form.register('name')} />

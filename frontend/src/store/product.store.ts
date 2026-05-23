@@ -7,6 +7,7 @@ interface ProductStore {
   lowStock: Product[];
   total: number;
   loading: boolean;
+  lowStockLoading: boolean;
   error: string | null;
   fetchProducts: (params?: { page?: number; limit?: number; category?: string; supplierId?: string; search?: string }) => Promise<void>;
   fetchLowStock: () => Promise<void>;
@@ -20,6 +21,7 @@ export const useProductStore = create<ProductStore>((set, get) => ({
   lowStock: [],
   total: 0,
   loading: false,
+  lowStockLoading: false,
   error: null,
 
   fetchProducts: async (params = {}) => {
@@ -36,11 +38,14 @@ export const useProductStore = create<ProductStore>((set, get) => ({
   },
 
   fetchLowStock: async () => {
+    set({ lowStockLoading: true });
     try {
       const { data } = await api.get('/products/low-stock');
       set({ lowStock: data.data || [] });
     } catch {
       set({ lowStock: [] });
+    } finally {
+      set({ lowStockLoading: false });
     }
   },
 
