@@ -134,7 +134,7 @@ mini-erp/
 4. Agregar variables de entorno:
    - `DATABASE_URL`: Tu conexión directa de Supabase (puerto 5432)
    - `FRONTEND_URL`: La URL de tu frontend en Vercel
-   - `JWT_SECRET`: Una clave secreta para firmar los tokens JWT
+   - `JWT_SECRET`: Clave secreta de al menos 32 caracteres para firmar tokens JWT
 5. Ejecutar migraciones manualmente:
    ```bash
    npx prisma migrate deploy
