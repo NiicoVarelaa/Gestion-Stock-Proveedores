@@ -1,5 +1,4 @@
 {
-  "root": "frontend",
   "buildCommand": "pnpm install && pnpm run build",
   "outputDirectory": "dist",
   "rewrites": [
