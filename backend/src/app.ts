@@ -31,7 +31,7 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-app.use('/api/auth', authLimiter, authRoutes);
+app.use('/api/auth', authRoutes);
 app.use('/api/suppliers', authMiddleware, supplierRoutes);
 app.use('/api/products', authMiddleware, productRoutes);
 app.use('/api/stock-movements', authMiddleware, stockMovementRoutes);
