@@ -21,7 +21,7 @@ app.use(cors({
   credentials: true,
 }));
 app.use(requestIdMiddleware);
-app.use(morgan(':method :url :status :response-timems - :res[x-request-id]'));
+app.use(morgan(':method :url :status :response-time ms - :res[x-request-id]'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
