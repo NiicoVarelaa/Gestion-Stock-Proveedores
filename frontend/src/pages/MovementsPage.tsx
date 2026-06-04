@@ -70,12 +70,12 @@ export default function MovementsPage() {
   const { products, fetchProducts } = useProductStore();
   const [open, setOpen] = useState(false);
   const [page, setPage] = useState(1);
-  const [typeFilter, setTypeFilter] = useState('');
+  const [typeFilter, setTypeFilter] = useState<string | undefined>(undefined);
   const limit = 10;
 
   const form = useForm<FormData>({
     resolver: zodResolver(movementSchema),
-    defaultValues: { type: 'IN', quantity: 0, productId: '', reason: '' },
+    defaultValues: { type: 'IN', quantity: 1, productId: '', reason: '' },
   });
 
   const loadData = () => {
@@ -88,8 +88,11 @@ export default function MovementsPage() {
 
   useEffect(() => {
     loadData();
-    fetchProducts({ limit: 100 });
   }, [page, typeFilter]);
+
+  useEffect(() => {
+    fetchProducts({ limit: 100 });
+  }, []);
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -107,7 +110,7 @@ export default function MovementsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <h1 className="text-2xl font-bold text-gray-900">Movimientos de Stock</h1>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
@@ -172,13 +175,13 @@ export default function MovementsPage() {
         </Dialog>
       </div>
 
-      <div className="flex items-center gap-4">
-        <Select value={typeFilter} onValueChange={(v) => { setTypeFilter(v); setPage(1); }}>
-          <SelectTrigger className="w-48">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <Select value={typeFilter || 'all'} onValueChange={(v) => { setTypeFilter(v === 'all' ? undefined : v); setPage(1); }}>
+          <SelectTrigger className="w-full sm:w-48">
             <SelectValue placeholder="Todos los tipos" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Todos los tipos</SelectItem>
+            <SelectItem value="all">Todos los tipos</SelectItem>
             <SelectItem value="IN">Entradas</SelectItem>
             <SelectItem value="OUT">Salidas</SelectItem>
           </SelectContent>
@@ -234,7 +237,7 @@ export default function MovementsPage() {
       </div>
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-sm text-gray-500">
             Mostrando {movements.length} de {total} movimientos
           </p>

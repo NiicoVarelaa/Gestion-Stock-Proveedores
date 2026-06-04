@@ -1,5 +1,5 @@
 import { prisma } from '../config/database';
-import { NotFoundError } from '../utils/errors';
+import { NotFoundError, BusinessError } from '../utils/errors';
 import type { CreateSupplierInput, UpdateSupplierInput } from '../routes/supplier.schema';
 
 export class SupplierService {
@@ -43,7 +43,7 @@ export class SupplierService {
 
   async deactivate(id: string) {
     const supplier = await this.findById(id);
-    if (!supplier.active) throw new NotFoundError('El proveedor ya está desactivado');
+    if (!supplier.active) throw new BusinessError('El proveedor ya está desactivado');
     return prisma.supplier.update({ where: { id }, data: { active: false } });
   }
 }

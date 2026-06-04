@@ -1,13 +1,13 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '../config/database';
-import { NotFoundError } from '../utils/errors';
+import { NotFoundError, BusinessError } from '../utils/errors';
 import type { CreateProductInput, UpdateProductInput } from '../routes/product.schema';
 
 export class ProductService {
   async create(data: CreateProductInput) {
     const supplier = await prisma.supplier.findUnique({ where: { id: data.supplierId } });
     if (!supplier) throw new NotFoundError('Proveedor no encontrado');
-    if (!supplier.active) throw new NotFoundError('El proveedor está desactivado');
+    if (!supplier.active) throw new BusinessError('El proveedor está desactivado');
 
     return prisma.product.create({
       data: {

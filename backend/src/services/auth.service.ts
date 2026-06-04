@@ -1,3 +1,4 @@
+import { Response } from 'express';
 import { prisma } from '../config/database';
 import { AppError } from '../utils/errors';
 import bcrypt from 'bcrypt';
@@ -9,7 +10,7 @@ const COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000;
 export class AuthService {
   async register(email: string, password: string, name: string) {
     const existing = await prisma.user.findUnique({ where: { email } });
-    if (existing) throw new AppError('El email ya estÃ¡ registrado', 409);
+    if (existing) throw new AppError('El email ya está registrado', 409);
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
@@ -25,10 +26,10 @@ export class AuthService {
 
   async login(email: string, password: string) {
     const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) throw new AppError('Credenciales invÃ¡lidas', 401);
+    if (!user) throw new AppError('Credenciales inválidas', 401);
 
     const validPassword = await bcrypt.compare(password, user.password);
-    if (!validPassword) throw new AppError('Credenciales invÃ¡lidas', 401);
+    if (!validPassword) throw new AppError('Credenciales inválidas', 401);
 
     const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, env.jwtSecret, {
       expiresIn: '7d',
@@ -38,16 +39,16 @@ export class AuthService {
   }
 }
 
-export function setAuthCookie(res: any, token: string) {
+export function setAuthCookie(res: Response, token: string) {
   res.cookie('auth_token', token, {
     httpOnly: true,
     secure: env.nodeEnv === 'production',
-    sameSite: env.nodeEnv === 'production' ? 'none' : 'lax',
+    sameSite: 'lax',
     maxAge: COOKIE_MAX_AGE,
     path: '/',
   });
 }
 
-export function clearAuthCookie(res: any) {
+export function clearAuthCookie(res: Response) {
   res.clearCookie('auth_token', { path: '/' });
 }

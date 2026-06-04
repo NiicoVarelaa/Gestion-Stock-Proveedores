@@ -11,6 +11,7 @@ import authRoutes from './routes/auth.routes';
 import supplierRoutes from './routes/supplier.routes';
 import productRoutes from './routes/product.routes';
 import stockMovementRoutes from './routes/stock-movement.routes';
+import dashboardRoutes from './routes/dashboard.routes';
 import { env } from './config/env';
 
 const app: express.Application = express();
@@ -22,19 +23,21 @@ app.use(cors({
 }));
 app.use(requestIdMiddleware);
 app.use(morgan(':method :url :status :response-time ms - :res[x-request-id]'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
-app.use(apiLimiter);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+app.use(apiLimiter);
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
 app.use('/api/auth', authRoutes);
 app.use('/api/suppliers', authMiddleware, supplierRoutes);
 app.use('/api/products', authMiddleware, productRoutes);
 app.use('/api/stock-movements', authMiddleware, stockMovementRoutes);
+app.use('/api/dashboard', authMiddleware, dashboardRoutes);
 
 app.use((req, res) => {
   res.status(404).json({

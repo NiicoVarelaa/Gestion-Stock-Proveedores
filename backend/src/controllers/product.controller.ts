@@ -3,6 +3,13 @@ import { ProductService } from '../services/product.service';
 
 const productService = new ProductService();
 
+const getQueryParam = (query: Request['query'], key: string): string | undefined => {
+  const val = query[key];
+  if (Array.isArray(val)) return typeof val[0] === 'string' ? val[0] : undefined;
+  if (typeof val === 'string') return val;
+  return undefined;
+};
+
 export class ProductController {
   async create(req: Request, res: Response, next: NextFunction) {
     try {
@@ -17,9 +24,9 @@ export class ProductController {
     try {
       const page = Number(req.query.page) || 1;
       const limit = Number(req.query.limit) || 10;
-      const category = req.query.category as string | undefined;
-      const supplierId = req.query.supplierId as string | undefined;
-      const search = req.query.search as string | undefined;
+      const category = getQueryParam(req.query, 'category');
+      const supplierId = getQueryParam(req.query, 'supplierId');
+      const search = getQueryParam(req.query, 'search');
       const result = await productService.findAll(page, limit, { category, supplierId, search });
       res.json({ success: true, ...result });
     } catch (error) {

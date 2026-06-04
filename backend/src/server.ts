@@ -1,9 +1,7 @@
 import 'dotenv/config';
-import { validateEnv, env } from './config/env';
+import { env } from './config/env';
 import app from './app';
 import { prisma } from './config/database';
-
-validateEnv();
 
 async function start() {
   try {

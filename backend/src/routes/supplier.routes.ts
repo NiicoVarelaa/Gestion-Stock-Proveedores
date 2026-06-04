@@ -15,6 +15,6 @@ router.post('/', validate(createSupplierSchema), controller.create.bind(controll
 router.get('/', validate(listSuppliersSchema), controller.findAll.bind(controller));
 router.get('/:id', validate(getSupplierSchema), controller.findById.bind(controller));
 router.put('/:id', validate(updateSupplierSchema), controller.update.bind(controller));
-router.delete('/:id', validate(getSupplierSchema), controller.deactivate.bind(controller));
+router.patch('/:id/deactivate', validate(getSupplierSchema), controller.deactivate.bind(controller));
 
 export default router;

@@ -9,6 +9,7 @@ interface ProductStore {
   loading: boolean;
   lowStockLoading: boolean;
   error: string | null;
+  lastFetchParams: { page?: number; limit?: number; category?: string; supplierId?: string; search?: string };
   fetchProducts: (params?: { page?: number; limit?: number; category?: string; supplierId?: string; search?: string }) => Promise<void>;
   fetchLowStock: () => Promise<void>;
   createProduct: (data: { name: string; category: string; price: number; minStock?: number; supplierId: string }) => Promise<void>;
@@ -23,9 +24,10 @@ export const useProductStore = create<ProductStore>((set, get) => ({
   loading: false,
   lowStockLoading: false,
   error: null,
+  lastFetchParams: {},
 
   fetchProducts: async (params = {}) => {
-    set({ loading: true, error: null });
+    set({ loading: true, error: null, lastFetchParams: params });
     try {
       const { data } = await api.get('/products', { params });
       set({ products: data.data || [], total: data.total || 0 });
@@ -53,8 +55,8 @@ export const useProductStore = create<ProductStore>((set, get) => ({
     set({ loading: true, error: null });
     try {
       await api.post('/products', data);
-      await get().fetchProducts();
-      await get().fetchLowStock();
+      const params = get().lastFetchParams;
+      await Promise.all([get().fetchProducts(params), get().fetchLowStock()]);
     } catch (err) {
       set({ error: 'Error al crear producto' });
       throw err;
@@ -67,8 +69,8 @@ export const useProductStore = create<ProductStore>((set, get) => ({
     set({ loading: true, error: null });
     try {
       await api.put(`/products/${id}`, data);
-      await get().fetchProducts();
-      await get().fetchLowStock();
+      const params = get().lastFetchParams;
+      await Promise.all([get().fetchProducts(params), get().fetchLowStock()]);
     } catch (err) {
       set({ error: 'Error al actualizar producto' });
       throw err;
@@ -81,8 +83,8 @@ export const useProductStore = create<ProductStore>((set, get) => ({
     set({ loading: true, error: null });
     try {
       await api.delete(`/products/${id}`);
-      await get().fetchProducts();
-      await get().fetchLowStock();
+      const params = get().lastFetchParams;
+      await Promise.all([get().fetchProducts(params), get().fetchLowStock()]);
     } catch (err) {
       set({ error: 'Error al eliminar producto' });
       throw err;

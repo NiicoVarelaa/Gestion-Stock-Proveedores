@@ -118,7 +118,7 @@ export default function SuppliersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <h1 className="text-2xl font-bold text-gray-900">Proveedores</h1>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
@@ -158,13 +158,13 @@ export default function SuppliersPage() {
         </Dialog>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
         <Search className="h-4 w-4 text-gray-400" />
         <Input
           placeholder="Buscar por nombre o email..."
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          className="max-w-sm"
+          className="w-full sm:max-w-sm"
         />
       </div>
 
@@ -219,7 +219,7 @@ export default function SuppliersPage() {
       </div>
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-sm text-gray-500">
             Mostrando {suppliers.length} de {total} proveedores
           </p>

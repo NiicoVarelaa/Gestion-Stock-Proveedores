@@ -7,6 +7,7 @@ interface MovementStore {
   total: number;
   loading: boolean;
   error: string | null;
+  lastFetchParams: { page?: number; limit?: number; productId?: string; type?: 'IN' | 'OUT'; from?: string; to?: string };
   fetchMovements: (params?: { page?: number; limit?: number; productId?: string; type?: 'IN' | 'OUT'; from?: string; to?: string }) => Promise<void>;
   createMovement: (data: { type: 'IN' | 'OUT'; quantity: number; productId: string; reason?: string }) => Promise<void>;
 }
@@ -16,9 +17,10 @@ export const useMovementStore = create<MovementStore>((set, get) => ({
   total: 0,
   loading: false,
   error: null,
+  lastFetchParams: {},
 
   fetchMovements: async (params = {}) => {
-    set({ loading: true, error: null });
+    set({ loading: true, error: null, lastFetchParams: params });
     try {
       const { data } = await api.get('/stock-movements', { params });
       set({ movements: data.data || [], total: data.total || 0 });
@@ -34,7 +36,8 @@ export const useMovementStore = create<MovementStore>((set, get) => ({
     set({ loading: true, error: null });
     try {
       await api.post('/stock-movements', data);
-      await get().fetchMovements();
+      const params = get().lastFetchParams;
+      await get().fetchMovements(params);
     } catch (err) {
       set({ error: 'Error al registrar movimiento' });
       throw err;

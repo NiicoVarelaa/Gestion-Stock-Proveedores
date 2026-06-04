@@ -7,6 +7,7 @@ interface SupplierStore {
   total: number;
   loading: boolean;
   error: string | null;
+  lastFetchParams: { page?: number; limit?: number; search?: string };
   fetchSuppliers: (params?: { page?: number; limit?: number; search?: string }) => Promise<{ total: number }>;
   createSupplier: (data: { name: string; email: string; phone?: string; address?: string }) => Promise<void>;
   updateSupplier: (id: string, data: { name?: string; email?: string; phone?: string; address?: string }) => Promise<void>;
@@ -18,9 +19,10 @@ export const useSupplierStore = create<SupplierStore>((set, get) => ({
   total: 0,
   loading: false,
   error: null,
+  lastFetchParams: {},
 
   fetchSuppliers: async (params = {}) => {
-    set({ loading: true, error: null });
+    set({ loading: true, error: null, lastFetchParams: params });
     try {
       const { data } = await api.get('/suppliers', { params });
       set({ suppliers: data.data || [], total: data.total || 0 });
@@ -37,7 +39,8 @@ export const useSupplierStore = create<SupplierStore>((set, get) => ({
     set({ loading: true, error: null });
     try {
       await api.post('/suppliers', data);
-      await get().fetchSuppliers();
+      const params = get().lastFetchParams;
+      await get().fetchSuppliers(params);
     } catch (err) {
       set({ error: 'Error al crear proveedor' });
       throw err;
@@ -50,7 +53,8 @@ export const useSupplierStore = create<SupplierStore>((set, get) => ({
     set({ loading: true, error: null });
     try {
       await api.put(`/suppliers/${id}`, data);
-      await get().fetchSuppliers();
+      const params = get().lastFetchParams;
+      await get().fetchSuppliers(params);
     } catch (err) {
       set({ error: 'Error al actualizar proveedor' });
       throw err;
@@ -62,8 +66,9 @@ export const useSupplierStore = create<SupplierStore>((set, get) => ({
   deactivateSupplier: async (id) => {
     set({ loading: true, error: null });
     try {
-      await api.delete(`/suppliers/${id}`);
-      await get().fetchSuppliers();
+      await api.patch(`/suppliers/${id}/deactivate`);
+      const params = get().lastFetchParams;
+      await get().fetchSuppliers(params);
     } catch (err) {
       set({ error: 'Error al desactivar proveedor' });
       throw err;

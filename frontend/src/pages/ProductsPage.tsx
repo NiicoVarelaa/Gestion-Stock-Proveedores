@@ -76,12 +76,13 @@ export default function ProductsPage() {
   const [editing, setEditing] = useState<Product | null>(null);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
-  const [category, setCategory] = useState('');
+  const [category, setCategory] = useState<string | undefined>(undefined);
   const limit = 10;
 
   const form = useForm<FormData>({
     resolver: zodResolver(productSchema),
-    defaultValues: { name: '', category: '', price: 0, minStock: 5, supplierId: '' },
+    defaultValues: { name: '', category: '', price: undefined as unknown as number, minStock: 5, supplierId: '' },
+    mode: 'onSubmit',
   });
 
   const categories = useMemo(
@@ -100,9 +101,12 @@ export default function ProductsPage() {
 
   useEffect(() => {
     loadData();
+  }, [page, search, category]);
+
+  useEffect(() => {
     fetchLowStock();
     fetchSuppliers({ limit: 100 });
-  }, [page, search, category]);
+  }, []);
 
   const handleOpen = (product?: Product) => {
     if (product) {
@@ -157,7 +161,7 @@ export default function ProductsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <h1 className="text-2xl font-bold text-gray-900">Productos</h1>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
@@ -221,7 +225,7 @@ export default function ProductsPage() {
         </Dialog>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
         <div className="flex items-center gap-2 flex-1 max-w-sm">
           <Search className="h-4 w-4 text-gray-400" />
           <Input
@@ -230,12 +234,12 @@ export default function ProductsPage() {
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
           />
         </div>
-        <Select value={category} onValueChange={(v) => { setCategory(v); setPage(1); }}>
-          <SelectTrigger className="w-48">
+        <Select value={category || 'all'} onValueChange={(v) => { setCategory(v === 'all' ? undefined : v); setPage(1); }}>
+          <SelectTrigger className="w-full sm:w-48">
             <SelectValue placeholder="Todas las categorías" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Todas las categorías</SelectItem>
+            <SelectItem value="all">Todas las categorías</SelectItem>
             {categories.map((cat) => (
               <SelectItem key={cat} value={cat}>{cat}</SelectItem>
             ))}
@@ -297,7 +301,7 @@ export default function ProductsPage() {
       </div>
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-sm text-gray-500">
             Mostrando {products.length} de {total} productos
           </p>

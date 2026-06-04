@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { prisma } from '../config/database';
 import { NotFoundError, BusinessError } from '../utils/errors';
 import type { CreateMovementInput } from '../routes/stock-movement.schema';
@@ -39,6 +40,8 @@ export class StockMovementService {
       ]);
 
       return { movement, product: updatedProduct };
+    }, {
+      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
     });
   }
 
@@ -54,9 +57,10 @@ export class StockMovementService {
     if (filters.productId) where.productId = filters.productId;
     if (filters.type) where.type = filters.type;
     if (filters.from || filters.to) {
-      where.createdAt = {};
-      if (filters.from) (where.createdAt as Record<string, unknown>).gte = new Date(filters.from);
-      if (filters.to) (where.createdAt as Record<string, unknown>).lte = new Date(filters.to);
+      const dateFilter: Record<string, Date> = {};
+      if (filters.from) dateFilter.gte = new Date(filters.from);
+      if (filters.to) dateFilter.lte = new Date(filters.to);
+      where.createdAt = dateFilter;
     }
 
     const [data, total] = await Promise.all([

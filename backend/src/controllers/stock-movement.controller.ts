@@ -3,6 +3,13 @@ import { StockMovementService } from '../services/stock-movement.service';
 
 const movementService = new StockMovementService();
 
+const getQueryParam = (query: Request['query'], key: string): string | undefined => {
+  const val = query[key];
+  if (Array.isArray(val)) return typeof val[0] === 'string' ? val[0] : undefined;
+  if (typeof val === 'string') return val;
+  return undefined;
+};
+
 export class StockMovementController {
   async create(req: Request, res: Response, next: NextFunction) {
     try {
@@ -17,10 +24,10 @@ export class StockMovementController {
     try {
       const page = Number(req.query.page) || 1;
       const limit = Number(req.query.limit) || 10;
-      const productId = req.query.productId as string | undefined;
-      const type = req.query.type as 'IN' | 'OUT' | undefined;
-      const from = req.query.from as string | undefined;
-      const to = req.query.to as string | undefined;
+      const productId = getQueryParam(req.query, 'productId');
+      const type = getQueryParam(req.query, 'type') as 'IN' | 'OUT' | undefined;
+      const from = getQueryParam(req.query, 'from');
+      const to = getQueryParam(req.query, 'to');
       const result = await movementService.findAll(page, limit, { productId, type, from, to });
       res.json({ success: true, ...result });
     } catch (error) {
