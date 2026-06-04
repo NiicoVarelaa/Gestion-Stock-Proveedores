@@ -15,13 +15,11 @@ export class ProductController {
 
   async findAll(req: Request, res: Response, next: NextFunction) {
     try {
-      const { page, limit, category, supplierId, search } = req.query as unknown as {
-        page: number;
-        limit: number;
-        category?: string;
-        supplierId?: string;
-        search?: string;
-      };
+      const page = Number(req.query.page) || 1;
+      const limit = Number(req.query.limit) || 10;
+      const category = req.query.category as string | undefined;
+      const supplierId = req.query.supplierId as string | undefined;
+      const search = req.query.search as string | undefined;
       const result = await productService.findAll(page, limit, { category, supplierId, search });
       res.json({ success: true, ...result });
     } catch (error) {

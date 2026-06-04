@@ -15,7 +15,9 @@ export class SupplierController {
 
   async findAll(req: Request, res: Response, next: NextFunction) {
     try {
-      const { page, limit, search } = req.query as unknown as { page: number; limit: number; search?: string };
+      const page = Number(req.query.page) || 1;
+      const limit = Number(req.query.limit) || 10;
+      const search = req.query.search as string | undefined;
       const result = await supplierService.findAll(page, limit, search);
       res.json({ success: true, ...result });
     } catch (error) {

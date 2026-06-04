@@ -15,14 +15,12 @@ export class StockMovementController {
 
   async findAll(req: Request, res: Response, next: NextFunction) {
     try {
-      const { page, limit, productId, type, from, to } = req.query as unknown as {
-        page: number;
-        limit: number;
-        productId?: string;
-        type?: 'IN' | 'OUT';
-        from?: string;
-        to?: string;
-      };
+      const page = Number(req.query.page) || 1;
+      const limit = Number(req.query.limit) || 10;
+      const productId = req.query.productId as string | undefined;
+      const type = req.query.type as 'IN' | 'OUT' | undefined;
+      const from = req.query.from as string | undefined;
+      const to = req.query.to as string | undefined;
       const result = await movementService.findAll(page, limit, { productId, type, from, to });
       res.json({ success: true, ...result });
     } catch (error) {
