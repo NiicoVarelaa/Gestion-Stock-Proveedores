@@ -19,4 +19,6 @@ export const env = {
   jwtSecret: process.env.JWT_SECRET!,
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
   databaseUrl: process.env.DATABASE_URL!,
+  smtpUser: process.env.SMTP_USER || '',
+  smtpPass: process.env.SMTP_PASS || '',
 } as const;

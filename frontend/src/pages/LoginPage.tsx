@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 const loginSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -97,6 +97,11 @@ export default function LoginPage() {
                 <p className="text-sm text-red-500">
                   {(isRegister ? registerForm.formState.errors.password : loginForm.formState.errors.password)?.message}
                 </p>
+              )}
+              {!isRegister && (
+                <Link to="/reset-password" className="text-sm text-blue-600 hover:underline">
+                  ¿Olvidaste tu contraseña?
+                </Link>
               )}
             </div>
             <Button type="submit" className="w-full" disabled={loading}>

@@ -8,6 +8,7 @@ import { authMiddleware } from './middlewares/auth';
 import { authLimiter, apiLimiter } from './middlewares/rateLimiter';
 import { errorHandler } from './middlewares/errorHandler';
 import authRoutes from './routes/auth.routes';
+import passwordResetRoutes from './routes/password-reset.routes';
 import supplierRoutes from './routes/supplier.routes';
 import productRoutes from './routes/product.routes';
 import stockMovementRoutes from './routes/stock-movement.routes';
@@ -34,6 +35,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use('/api/auth', authRoutes);
+app.use('/api/auth', passwordResetRoutes);
 app.use('/api/suppliers', authMiddleware, supplierRoutes);
 app.use('/api/products', authMiddleware, productRoutes);
 app.use('/api/stock-movements', authMiddleware, stockMovementRoutes);

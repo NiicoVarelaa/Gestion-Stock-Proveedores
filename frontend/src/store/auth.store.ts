@@ -11,6 +11,9 @@ interface AuthStore {
   register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
   initialize: () => Promise<void>;
+  forgotPassword: (email: string) => Promise<void>;
+  verifyResetCode: (email: string, code: string) => Promise<void>;
+  resetPassword: (email: string, code: string, password: string) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthStore>((set) => ({
@@ -53,6 +56,33 @@ export const useAuthStore = create<AuthStore>((set) => ({
       await api.post('/auth/logout');
     } finally {
       set({ user: null, isAuthenticated: false });
+    }
+  },
+
+  forgotPassword: async (email: string) => {
+    set({ loading: true });
+    try {
+      await api.post('/auth/forgot-password', { email });
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  verifyResetCode: async (email: string, code: string) => {
+    set({ loading: true });
+    try {
+      await api.post('/auth/verify-code', { email, code });
+    } finally {
+      set({ loading: false });
+    }
+  },
+
+  resetPassword: async (email: string, code: string, password: string) => {
+    set({ loading: true });
+    try {
+      await api.post('/auth/reset-password', { email, code, password });
+    } finally {
+      set({ loading: false });
     }
   },
 }));
