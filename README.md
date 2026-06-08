@@ -56,6 +56,7 @@ Sistema de gestión de inventario para tiendas electrónicas. Dashboard con mét
 - **Validación end-to-end** con Zod
 - **Seed de datos** realistas para demo (30 productos, 8 proveedores, 100+ movimientos)
 - **Paginación persistente** que mantiene la página actual tras mutaciones
+- **Recuperación de contraseña** con código por email (Gmail SMTP, expiración 10 min)
 
 ## Tech Stack
 
@@ -116,6 +117,9 @@ pnpm run dev
 | POST | `/api/stock-movements` | Registrar movimiento (transaccional) |
 | GET | `/api/stock-movements` | Historial de movimientos |
 | GET | `/api/dashboard/metrics` | Métricas del dashboard |
+| POST | `/api/auth/forgot-password` | Solicitar código de recuperación |
+| POST | `/api/auth/verify-code` | Verificar código de recuperación |
+| POST | `/api/auth/reset-password` | Restablecer contraseña |
 
 ## Transacciones ACID
 
@@ -193,6 +197,8 @@ mini-erp/
    - `DATABASE_URL`: Tu conexión de PostgreSQL
    - `FRONTEND_URL`: La URL de tu frontend en Vercel
    - `JWT_SECRET`: Clave secreta de al menos 32 caracteres
+   - `SMTP_USER`: Email de Gmail para envío de códigos de recuperación
+   - `SMTP_PASS`: Contraseña de aplicación de Gmail (App Password)
 5. Ejecutar migraciones y seed:
    ```bash
    npx prisma migrate deploy
