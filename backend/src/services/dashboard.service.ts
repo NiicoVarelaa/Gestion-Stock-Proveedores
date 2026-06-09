@@ -41,7 +41,7 @@ export class DashboardService {
       prisma.product.findMany({
         take: 5,
         orderBy: { stock: 'desc' },
-        select: { id: true, name: true, stock: true, category: true },
+        select: { id: true, name: true, stock: true, category: true, imageUrl: true },
       }),
       prisma.product.findMany({
         select: { price: true, stock: true },

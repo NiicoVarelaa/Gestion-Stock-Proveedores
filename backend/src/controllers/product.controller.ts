@@ -13,7 +13,7 @@ const getQueryParam = (query: Request['query'], key: string): string | undefined
 export class ProductController {
   async create(req: Request, res: Response, next: NextFunction) {
     try {
-      const product = await productService.create(req.body);
+      const product = await productService.create(req.body, req.file);
       res.status(201).json({ success: true, data: product });
     } catch (error) {
       next(error);
@@ -45,7 +45,7 @@ export class ProductController {
 
   async update(req: Request, res: Response, next: NextFunction) {
     try {
-      const product = await productService.update(req.params.id as string, req.body);
+      const product = await productService.update(req.params.id as string, req.body, req.file);
       res.json({ success: true, data: product });
     } catch (error) {
       next(error);
@@ -56,6 +56,18 @@ export class ProductController {
     try {
       await productService.remove(req.params.id as string);
       res.json({ success: true, message: 'Producto eliminado' });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async updateImage(req: Request, res: Response, next: NextFunction) {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ success: false, message: 'No se proporcionó una imagen' });
+      }
+      const product = await productService.updateImage(req.params.id as string, req.file);
+      res.json({ success: true, data: product });
     } catch (error) {
       next(error);
     }

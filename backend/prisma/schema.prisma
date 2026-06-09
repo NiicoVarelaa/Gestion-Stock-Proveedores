@@ -42,6 +42,7 @@ model Product {
   price       Decimal     @db.Decimal(10, 2)
   stock       Int         @default(0)
   minStock    Int         @default(5)
+  imageUrl    String?
   supplierId  String
   supplier    Supplier    @relation(fields: [supplierId], references: [id], onDelete: Restrict)
   movements   StockMovement[]

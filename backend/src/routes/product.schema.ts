@@ -7,6 +7,7 @@ export const createProductSchema = z.object({
     price: z.coerce.number().positive('El precio debe ser positivo'),
     minStock: z.coerce.number().int().nonnegative().default(5),
     supplierId: z.string().uuid('ID de proveedor inválido'),
+    imageUrl: z.string().url('URL de imagen inválida').optional().or(z.literal('')).optional(),
   }),
 });
 
@@ -20,6 +21,7 @@ export const updateProductSchema = z.object({
     price: z.coerce.number().positive().optional(),
     minStock: z.coerce.number().int().nonnegative().optional(),
     supplierId: z.string().uuid().optional(),
+    imageUrl: z.string().url('URL de imagen inválida').optional().or(z.literal('')).optional(),
   }),
 });
 

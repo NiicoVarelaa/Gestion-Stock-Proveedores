@@ -23,6 +23,7 @@ export interface Product {
   price: string;
   stock: number;
   minStock: number;
+  imageUrl: string | null;
   supplierId: string;
   supplier: Supplier;
   createdAt: string;

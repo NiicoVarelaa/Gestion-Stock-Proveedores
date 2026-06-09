@@ -6,6 +6,7 @@ import { useDashboardStore } from '@/store/dashboard.store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, Truck, ArrowUpRight, ArrowDownRight, Package, DollarSign, TrendingUp } from 'lucide-react';
+import { ProductImageWithFallback } from '@/components/ProductImage';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -258,9 +259,16 @@ export default function Dashboard() {
                   key={product.id}
                   className="flex items-center justify-between rounded-lg bg-red-50 p-3"
                 >
-                  <div>
-                    <p className="font-medium">{product.name}</p>
-                    <p className="text-sm text-gray-500">{product.supplier.name}</p>
+                  <div className="flex items-center gap-3">
+                    <ProductImageWithFallback
+                      src={product.imageUrl}
+                      alt={product.name}
+                      className="h-10 w-10"
+                    />
+                    <div>
+                      <p className="font-medium">{product.name}</p>
+                      <p className="text-sm text-gray-500">{product.supplier.name}</p>
+                    </div>
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-red-600">{product.stock} uds</p>
@@ -399,6 +407,11 @@ export default function Dashboard() {
                     <Badge variant="secondary" className="w-6 h-6 flex items-center justify-center p-0">
                       {index + 1}
                     </Badge>
+                    <ProductImageWithFallback
+                      src={product.imageUrl}
+                      alt={product.name}
+                      className="h-10 w-10"
+                    />
                     <div>
                       <p className="font-medium">{product.name}</p>
                       <p className="text-sm text-gray-500">{product.category}</p>

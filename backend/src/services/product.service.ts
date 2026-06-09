@@ -1,13 +1,40 @@
 import { Prisma } from '@prisma/client';
 import { prisma } from '../config/database';
+import { cloudinary } from '../config/cloudinary';
 import { NotFoundError, BusinessError } from '../utils/errors';
 import type { CreateProductInput, UpdateProductInput } from '../routes/product.schema';
 
+const uploadToCloudinary = (file: Express.Multer.File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: 'mini-erp/products', format: 'webp', quality: 'auto' },
+      (error, result) => {
+        if (error || !result) return reject(error || new Error('Error subiendo imagen'));
+        resolve(result.secure_url);
+      }
+    );
+    stream.end(file.buffer);
+  });
+};
+
+const deleteFromCloudinary = async (imageUrl: string) => {
+  const match = imageUrl.match(/\/v\d+\/(.+)\.\w+$/);
+  if (match) {
+    const publicId = match[1];
+    await cloudinary.uploader.destroy(publicId);
+  }
+};
+
 export class ProductService {
-  async create(data: CreateProductInput) {
+  async create(data: CreateProductInput, file?: Express.Multer.File) {
     const supplier = await prisma.supplier.findUnique({ where: { id: data.supplierId } });
     if (!supplier) throw new NotFoundError('Proveedor no encontrado');
     if (!supplier.active) throw new BusinessError('El proveedor está desactivado');
+
+    let imageUrl = data.imageUrl || null;
+    if (file) {
+      imageUrl = await uploadToCloudinary(file);
+    }
 
     return prisma.product.create({
       data: {
@@ -16,6 +43,7 @@ export class ProductService {
         price: new Prisma.Decimal(data.price.toString()),
         minStock: data.minStock,
         supplierId: data.supplierId,
+        imageUrl,
       },
       include: { supplier: { select: { id: true, name: true } } },
     });
@@ -58,8 +86,8 @@ export class ProductService {
     return product;
   }
 
-  async update(id: string, data: UpdateProductInput) {
-    await this.findById(id);
+  async update(id: string, data: UpdateProductInput, file?: Express.Multer.File) {
+    const existing = await this.findById(id);
 
     if (data.supplierId) {
       const supplier = await prisma.supplier.findUnique({ where: { id: data.supplierId } });
@@ -73,6 +101,18 @@ export class ProductService {
     if (data.minStock !== undefined) updateData.minStock = data.minStock;
     if (data.supplierId !== undefined) updateData.supplierId = data.supplierId;
 
+    if (file) {
+      if (existing.imageUrl) await deleteFromCloudinary(existing.imageUrl);
+      updateData.imageUrl = await uploadToCloudinary(file);
+    } else if (data.imageUrl !== undefined) {
+      if (data.imageUrl === '' && existing.imageUrl) {
+        await deleteFromCloudinary(existing.imageUrl);
+        updateData.imageUrl = null;
+      } else if (data.imageUrl) {
+        updateData.imageUrl = data.imageUrl;
+      }
+    }
+
     return prisma.product.update({
       where: { id },
       data: updateData,
@@ -81,8 +121,20 @@ export class ProductService {
   }
 
   async remove(id: string) {
-    await this.findById(id);
+    const product = await this.findById(id);
+    if (product.imageUrl) await deleteFromCloudinary(product.imageUrl);
     return prisma.product.delete({ where: { id } });
+  }
+
+  async updateImage(id: string, file: Express.Multer.File) {
+    const existing = await this.findById(id);
+    if (existing.imageUrl) await deleteFromCloudinary(existing.imageUrl);
+    const imageUrl = await uploadToCloudinary(file);
+    return prisma.product.update({
+      where: { id },
+      data: { imageUrl },
+      include: { supplier: { select: { id: true, name: true } } },
+    });
   }
 
   async getLowStock() {

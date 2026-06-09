@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { FormFieldError } from '@/components/FormFieldError';
+import { ProductImageWithFallback } from '@/components/ProductImage';
 import {
   Dialog,
   DialogContent,
@@ -38,6 +39,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Search,
+  Upload,
+  X,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Product } from '@/types';
@@ -57,6 +60,7 @@ function TableSkeleton() {
     <>
       {Array.from({ length: 3 }).map((_, i) => (
         <TableRow key={i}>
+          <TableCell><div className="h-10 w-10 bg-gray-200 rounded animate-pulse" /></TableCell>
           <TableCell><div className="h-4 w-32 bg-gray-200 rounded animate-pulse" /></TableCell>
           <TableCell><div className="h-4 w-20 bg-gray-200 rounded animate-pulse" /></TableCell>
           <TableCell><div className="h-4 w-16 bg-gray-200 rounded animate-pulse" /></TableCell>
@@ -77,6 +81,9 @@ export default function ProductsPage() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<string | undefined>(undefined);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const limit = 10;
 
   const form = useForm<FormData>({
@@ -109,6 +116,8 @@ export default function ProductsPage() {
   }, []);
 
   const handleOpen = (product?: Product) => {
+    setSelectedFile(null);
+    setPreviewUrl(null);
     if (product) {
       setEditing(product);
       form.reset({
@@ -125,16 +134,33 @@ export default function ProductsPage() {
     setOpen(true);
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedFile(null);
+    setPreviewUrl(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
   const onSubmit = async (data: FormData) => {
     try {
       if (editing) {
-        await updateProduct(editing.id, data);
+        await updateProduct(editing.id, { ...data, image: selectedFile });
         toast.success('Producto actualizado');
       } else {
-        await createProduct(data);
+        await createProduct({ ...data, image: selectedFile });
         toast.success('Producto creado');
       }
       setOpen(false);
+      setSelectedFile(null);
+      setPreviewUrl(null);
       loadData();
     } catch {
       toast.error('Error al guardar producto');
@@ -170,11 +196,48 @@ export default function ProductsPage() {
               Nuevo Producto
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editing ? 'Editar Producto' : 'Nuevo Producto'}</DialogTitle>
             </DialogHeader>
             <form onSubmit={form.handleSubmit(onSubmit)} key={editing?.id || 'new'} className="space-y-4">
+              <div className="space-y-2">
+                <Label>Imagen del Producto</Label>
+                <div className="flex items-center gap-4">
+                  <ProductImageWithFallback
+                    src={previewUrl || editing?.imageUrl}
+                    alt={editing?.name || 'Producto'}
+                    className="h-20 w-20"
+                  />
+                  <div className="flex-1 space-y-2">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        <Upload className="mr-2 h-4 w-4" />
+                        Subir imagen
+                      </Button>
+                      {previewUrl && (
+                        <Button type="button" variant="ghost" size="sm" onClick={handleRemoveImage}>
+                          <X className="mr-2 h-4 w-4" />
+                          Quitar
+                        </Button>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500">JPG, PNG o WebP. Máx 5MB.</p>
+                  </div>
+                </div>
+              </div>
               <div className="space-y-2">
                 <Label>Nombre</Label>
                 <Input {...form.register('name')} />
@@ -251,6 +314,7 @@ export default function ProductsPage() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-14"></TableHead>
               <TableHead>Nombre</TableHead>
               <TableHead>Categoría</TableHead>
               <TableHead>Precio</TableHead>
@@ -264,7 +328,7 @@ export default function ProductsPage() {
               <TableSkeleton />
             ) : products.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-gray-500 py-8">
+                <TableCell colSpan={7} className="text-center text-gray-500 py-8">
                   No hay productos registrados
                 </TableCell>
               </TableRow>
@@ -273,6 +337,13 @@ export default function ProductsPage() {
                 const low = isLowStock(product);
                 return (
                   <TableRow key={product.id}>
+                    <TableCell>
+                      <ProductImageWithFallback
+                        src={product.imageUrl}
+                        alt={product.name}
+                        className="h-10 w-10"
+                      />
+                    </TableCell>
                     <TableCell className="font-medium">{product.name}</TableCell>
                     <TableCell>{product.category}</TableCell>
                     <TableCell>${Number(product.price).toFixed(2)}</TableCell>

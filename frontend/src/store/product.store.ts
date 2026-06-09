@@ -12,8 +12,8 @@ interface ProductStore {
   lastFetchParams: { page?: number; limit?: number; category?: string; supplierId?: string; search?: string };
   fetchProducts: (params?: { page?: number; limit?: number; category?: string; supplierId?: string; search?: string }) => Promise<void>;
   fetchLowStock: () => Promise<void>;
-  createProduct: (data: { name: string; category: string; price: number; minStock?: number; supplierId: string }) => Promise<void>;
-  updateProduct: (id: string, data: { name?: string; category?: string; price?: number; minStock?: number; supplierId?: string }) => Promise<void>;
+  createProduct: (data: { name: string; category: string; price: number; minStock?: number; supplierId: string; image?: File | null }) => Promise<void>;
+  updateProduct: (id: string, data: { name?: string; category?: string; price?: number; minStock?: number; supplierId?: string; image?: File | null; imageUrl?: string }) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
 }
 
@@ -54,7 +54,17 @@ export const useProductStore = create<ProductStore>((set, get) => ({
   createProduct: async (data) => {
     set({ loading: true, error: null });
     try {
-      await api.post('/products', data);
+      const { image, ...jsonFields } = data;
+      if (image) {
+        const formData = new FormData();
+        Object.entries(jsonFields).forEach(([key, value]) => {
+          if (value !== undefined) formData.append(key, String(value));
+        });
+        formData.append('image', image);
+        await api.post('/products', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+      } else {
+        await api.post('/products', jsonFields);
+      }
       const params = get().lastFetchParams;
       await Promise.all([get().fetchProducts(params), get().fetchLowStock()]);
     } catch (err) {
@@ -68,7 +78,17 @@ export const useProductStore = create<ProductStore>((set, get) => ({
   updateProduct: async (id, data) => {
     set({ loading: true, error: null });
     try {
-      await api.put(`/products/${id}`, data);
+      const { image, ...jsonFields } = data;
+      if (image) {
+        const formData = new FormData();
+        Object.entries(jsonFields).forEach(([key, value]) => {
+          if (value !== undefined && key !== 'imageUrl') formData.append(key, String(value));
+        });
+        formData.append('image', image);
+        await api.put(`/products/${id}`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+      } else {
+        await api.put(`/products/${id}`, jsonFields);
+      }
       const params = get().lastFetchParams;
       await Promise.all([get().fetchProducts(params), get().fetchLowStock()]);
     } catch (err) {

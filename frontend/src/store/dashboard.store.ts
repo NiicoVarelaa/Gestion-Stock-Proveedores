@@ -11,7 +11,7 @@ export interface DashboardMetrics {
   categoryDistribution: { category: string; count: number; stock: number }[];
   typeDistribution: { type: string; count: number; totalQuantity: number }[];
   movementsTrend: { date: string; IN: number; OUT: number }[];
-  topProducts: { id: string; name: string; stock: number; category: string }[];
+  topProducts: { id: string; name: string; stock: number; category: string; imageUrl: string | null }[];
   recentMovements: {
     id: string;
     type: 'IN' | 'OUT';
