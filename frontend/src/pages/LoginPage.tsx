@@ -6,9 +6,20 @@ import { useAuthStore } from '@/store/auth.store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { useNavigate, Link } from 'react-router-dom';
+import {
+  Mail,
+  Lock,
+  User,
+  LogIn,
+  UserPlus,
+  ArrowRight,
+  Package,
+  Eye,
+  EyeOff,
+} from 'lucide-react';
 
 const loginSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -26,6 +37,7 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 
 export default function LoginPage() {
   const [isRegister, setIsRegister] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { login, register: registerUser, loading } = useAuthStore();
   const navigate = useNavigate();
 
@@ -38,7 +50,6 @@ export default function LoginPage() {
     resolver: zodResolver(registerSchema),
     defaultValues: { email: '', password: '', name: '' },
   });
-
 
   const onSubmit = async (data: LoginFormData | RegisterFormData) => {
     try {
@@ -57,69 +68,158 @@ export default function LoginPage() {
     }
   };
 
+  const toggleMode = () => {
+    setIsRegister(!isRegister);
+    setShowPassword(false);
+    loginForm.reset();
+    registerForm.reset();
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">
-            {isRegister ? 'Crear Cuenta' : 'Iniciar Sesión'}
-          </CardTitle>
-          <CardDescription className="text-center">
-            {isRegister
-              ? 'Completa los datos para registrarte'
-              : 'Ingresa tus credenciales para acceder'}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={isRegister ? registerForm.handleSubmit(onSubmit) : loginForm.handleSubmit(onSubmit)} className="space-y-4">
-            {isRegister && (
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-50 via-blue-50 to-gray-100 p-4">
+      <div className="w-full max-w-md space-y-6">
+        {/* Logo / Brand */}
+        <div className="flex flex-col items-center gap-3">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-600 shadow-lg shadow-blue-600/25">
+            <Package className="h-7 w-7 text-white" />
+          </div>
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900">Mini ERP</h1>
+            <p className="text-sm text-gray-500">Gestión de Stock y Proveedores</p>
+          </div>
+        </div>
+
+        <Card className="border-0 shadow-xl shadow-gray-200/50">
+          <CardHeader className="space-y-1 pb-4">
+            <div className="flex items-center justify-center gap-2">
+              {isRegister ? (
+                <UserPlus className="h-5 w-5 text-blue-600" />
+              ) : (
+                <LogIn className="h-5 w-5 text-blue-600" />
+              )}
+              <h2 className="text-xl font-semibold text-gray-900">
+                {isRegister ? 'Crear Cuenta' : 'Iniciar Sesión'}
+              </h2>
+            </div>
+            <p className="text-center text-sm text-gray-500">
+              {isRegister
+                ? 'Completa los datos para registrarte'
+                : 'Ingresa tus credenciales para acceder'}
+            </p>
+          </CardHeader>
+          <CardContent>
+            <form
+              onSubmit={isRegister ? registerForm.handleSubmit(onSubmit) : loginForm.handleSubmit(onSubmit)}
+              className="space-y-4"
+            >
+              {isRegister && (
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="text-sm font-medium text-gray-700">
+                    Nombre
+                  </Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                    <Input
+                      id="name"
+                      {...registerForm.register('name')}
+                      placeholder="Tu nombre"
+                      className="pl-10"
+                    />
+                  </div>
+                  {registerForm.formState.errors.name && (
+                    <p className="text-sm text-red-500">{registerForm.formState.errors.name.message}</p>
+                  )}
+                </div>
+              )}
+
               <div className="space-y-2">
-                <Label>Nombre</Label>
-                <Input {...registerForm.register('name')} placeholder="Tu nombre" />
-                {registerForm.formState.errors.name && (
-                  <p className="text-sm text-red-500">{registerForm.formState.errors.name.message}</p>
+                <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+                  Email
+                </Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                  <Input
+                    id="email"
+                    {...(isRegister ? registerForm.register('email') : loginForm.register('email'))}
+                    type="email"
+                    placeholder="tu@email.com"
+                    className="pl-10"
+                  />
+                </div>
+                {(isRegister ? registerForm.formState.errors.email : loginForm.formState.errors.email) && (
+                  <p className="text-sm text-red-500">
+                    {(isRegister ? registerForm.formState.errors.email : loginForm.formState.errors.email)?.message}
+                  </p>
                 )}
               </div>
-            )}
-            <div className="space-y-2">
-              <Label>Email</Label>
-              <Input {...(isRegister ? registerForm.register('email') : loginForm.register('email'))} type="email" placeholder="tu@email.com" />
-              {(isRegister ? registerForm.formState.errors.email : loginForm.formState.errors.email) && (
-                <p className="text-sm text-red-500">
-                  {(isRegister ? registerForm.formState.errors.email : loginForm.formState.errors.email)?.message}
-                </p>
-              )}
+
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+                  Contraseña
+                </Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                  <Input
+                    id="password"
+                    {...(isRegister ? registerForm.register('password') : loginForm.register('password'))}
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="••••••••"
+                    className="pl-10 pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                {(isRegister ? registerForm.formState.errors.password : loginForm.formState.errors.password) && (
+                  <p className="text-sm text-red-500">
+                    {(isRegister ? registerForm.formState.errors.password : loginForm.formState.errors.password)?.message}
+                  </p>
+                )}
+                {!isRegister && (
+                  <Link to="/reset-password" className="text-sm text-blue-600 hover:underline cursor-pointer">
+                    ¿Olvidaste tu contraseña?
+                  </Link>
+                )}
+              </div>
+
+              <Button type="submit" className="w-full cursor-pointer" disabled={loading}>
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    Procesando...
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    {isRegister ? 'Crear Cuenta' : 'Iniciar Sesión'}
+                    <ArrowRight className="h-4 w-4" />
+                  </span>
+                )}
+              </Button>
+            </form>
+
+            <div className="mt-6 pt-4 border-t border-gray-100">
+              <p className="text-center text-sm text-gray-600">
+                {isRegister ? '¿Ya tenés cuenta?' : '¿No tenés cuenta?'}{' '}
+                <button
+                  type="button"
+                  className="font-medium text-blue-600 hover:text-blue-700 hover:underline cursor-pointer"
+                  onClick={toggleMode}
+                >
+                  {isRegister ? 'Iniciar Sesión' : 'Registrarse'}
+                </button>
+              </p>
             </div>
-            <div className="space-y-2">
-              <Label>Contraseña</Label>
-              <Input {...(isRegister ? registerForm.register('password') : loginForm.register('password'))} type="password" placeholder="••••••••" />
-              {(isRegister ? registerForm.formState.errors.password : loginForm.formState.errors.password) && (
-                <p className="text-sm text-red-500">
-                  {(isRegister ? registerForm.formState.errors.password : loginForm.formState.errors.password)?.message}
-                </p>
-              )}
-              {!isRegister && (
-                <Link to="/reset-password" className="text-sm text-blue-600 hover:underline">
-                  ¿Olvidaste tu contraseña?
-                </Link>
-              )}
-            </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {isRegister ? 'Registrarse' : 'Iniciar Sesión'}
-            </Button>
-            <p className="text-center text-sm text-gray-600">
-              {isRegister ? '¿Ya tenés cuenta?' : '¿No tenés cuenta?'}{' '}
-              <button
-                type="button"
-                className="text-blue-600 hover:underline"
-                onClick={() => setIsRegister(!isRegister)}
-              >
-                {isRegister ? 'Iniciar Sesión' : 'Registrarse'}
-              </button>
-            </p>
-          </form>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+
+        <p className="text-center text-xs text-gray-400">
+          Mini ERP &copy; {new Date().getFullYear()}
+        </p>
+      </div>
     </div>
   );
 }
