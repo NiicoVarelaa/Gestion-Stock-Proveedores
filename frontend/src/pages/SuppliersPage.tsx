@@ -23,7 +23,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Pencil, Trash2, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { Plus, Pencil, Trash2, ChevronLeft, ChevronRight, Search, Mail, Phone, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Supplier } from '@/types';
 
@@ -44,6 +44,7 @@ function TableSkeleton() {
           <TableCell><div className="h-4 w-32 bg-gray-200 rounded animate-pulse" /></TableCell>
           <TableCell><div className="h-4 w-40 bg-gray-200 rounded animate-pulse" /></TableCell>
           <TableCell><div className="h-4 w-24 bg-gray-200 rounded animate-pulse" /></TableCell>
+          <TableCell className="hidden sm:table-cell"><div className="h-4 w-28 bg-gray-200 rounded animate-pulse" /></TableCell>
           <TableCell><div className="h-5 w-14 bg-gray-200 rounded animate-pulse" /></TableCell>
           <TableCell><div className="h-8 w-16 bg-gray-200 rounded animate-pulse ml-auto" /></TableCell>
         </TableRow>
@@ -134,21 +135,30 @@ export default function SuppliersPage() {
             <form onSubmit={form.handleSubmit(onSubmit)} key={editing?.id || 'new'} className="space-y-4">
               <div className="space-y-2">
                 <Label>Nombre</Label>
-                <Input {...form.register('name')} />
+                <Input {...form.register('name')} placeholder="Nombre del proveedor" />
                 <FormFieldError error={form.formState.errors.name} />
               </div>
               <div className="space-y-2">
                 <Label>Email</Label>
-                <Input {...form.register('email')} type="email" />
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                  <Input {...form.register('email')} type="email" placeholder="contacto@proveedor.com" className="pl-10" />
+                </div>
                 <FormFieldError error={form.formState.errors.email} />
               </div>
               <div className="space-y-2">
                 <Label>Teléfono</Label>
-                <Input {...form.register('phone')} />
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                  <Input {...form.register('phone')} placeholder="+54 11 1234-5678" className="pl-10" />
+                </div>
               </div>
               <div className="space-y-2">
                 <Label>Dirección</Label>
-                <Input {...form.register('address')} />
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                  <Input {...form.register('address')} placeholder="Av. Corrientes 1234, CABA" className="pl-10" />
+                </div>
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
                 {editing ? 'Actualizar' : 'Crear'}
@@ -158,13 +168,12 @@ export default function SuppliersPage() {
         </Dialog>
       </div>
 
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+      <div className="flex items-center gap-2 flex-1 max-w-sm">
         <Search className="h-4 w-4 text-gray-400" />
         <Input
           placeholder="Buscar por nombre o email..."
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          className="w-full sm:max-w-sm"
         />
       </div>
 
@@ -175,6 +184,7 @@ export default function SuppliersPage() {
               <TableHead>Nombre</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Teléfono</TableHead>
+              <TableHead className="hidden sm:table-cell">Dirección</TableHead>
               <TableHead>Estado</TableHead>
               <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
@@ -184,7 +194,7 @@ export default function SuppliersPage() {
               <TableSkeleton />
             ) : suppliers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center text-gray-500 py-8">
+                <TableCell colSpan={6} className="text-center text-gray-500 py-8">
                   No hay proveedores registrados
                 </TableCell>
               </TableRow>
@@ -194,6 +204,7 @@ export default function SuppliersPage() {
                   <TableCell className="font-medium">{supplier.name}</TableCell>
                   <TableCell>{supplier.email}</TableCell>
                   <TableCell>{supplier.phone || '-'}</TableCell>
+                  <TableCell className="hidden sm:table-cell text-gray-500 text-sm">{supplier.address || '-'}</TableCell>
                   <TableCell>
                     <Badge variant={supplier.active ? 'default' : 'destructive'}>
                       {supplier.active ? 'Activo' : 'Inactivo'}

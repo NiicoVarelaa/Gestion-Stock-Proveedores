@@ -1,11 +1,12 @@
 import { useEffect, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { useProductStore } from '@/store/product.store';
 import { useMovementStore } from '@/store/movement.store';
 import { useSupplierStore } from '@/store/supplier.store';
 import { useDashboardStore } from '@/store/dashboard.store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, Truck, ArrowUpRight, ArrowDownRight, Package, DollarSign, TrendingUp } from 'lucide-react';
+import { AlertTriangle, Truck, ArrowUpRight, ArrowDownRight, Package, DollarSign, TrendingUp, ArrowRight } from 'lucide-react';
 import { ProductImageWithFallback } from '@/components/ProductImage';
 import {
   Chart as ChartJS,
@@ -189,10 +190,10 @@ export default function Dashboard() {
           </>
         ) : (
           <>
-            <Card>
+            <Card className="border-l-4 border-l-blue-500">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">Proveedores Activos</CardTitle>
-                <Truck className="h-4 w-4 text-gray-500" />
+                <Truck className="h-4 w-4 text-blue-500" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{metrics?.totalSuppliers || suppliers.filter((s) => s.active).length}</div>
@@ -202,7 +203,7 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="border-l-4 border-l-red-500">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">Stock Bajo</CardTitle>
                 <AlertTriangle className="h-4 w-4 text-red-500" />
@@ -215,7 +216,7 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="border-l-4 border-l-green-500">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">Entradas</CardTitle>
                 <ArrowUpRight className="h-4 w-4 text-green-500" />
@@ -228,7 +229,7 @@ export default function Dashboard() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="border-l-4 border-l-orange-500">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">Salidas</CardTitle>
                 <ArrowDownRight className="h-4 w-4 text-orange-500" />
@@ -246,11 +247,14 @@ export default function Dashboard() {
 
       {lowStock.length > 0 && (
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-red-600 flex items-center gap-2">
               <AlertTriangle className="h-5 w-5" />
               Alertas de Stock Bajo
             </CardTitle>
+            <Link to="/products" className="text-sm text-blue-600 hover:underline flex items-center gap-1 cursor-pointer">
+              Ver todos <ArrowRight className="h-3 w-3" />
+            </Link>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
@@ -350,8 +354,11 @@ export default function Dashboard() {
       </div>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Últimos Movimientos</CardTitle>
+          <Link to="/movements" className="text-sm text-blue-600 hover:underline flex items-center gap-1 cursor-pointer">
+            Ver todos <ArrowRight className="h-3 w-3" />
+          </Link>
         </CardHeader>
         <CardContent>
           {movements.length === 0 && !loadingMovements ? (
@@ -363,11 +370,23 @@ export default function Dashboard() {
                   key={movement.id}
                   className="flex items-center justify-between rounded-lg border p-3"
                 >
-                  <div>
-                    <p className="font-medium">{movement.product.name}</p>
-                    <p className="text-sm text-gray-500">
-                      {movement.reason || 'Sin motivo'}
-                    </p>
+                  <div className="flex items-center gap-3">
+                    <Badge
+                      variant={movement.type === 'IN' ? 'default' : 'destructive'}
+                      className="h-6 w-6 flex items-center justify-center p-0"
+                    >
+                      {movement.type === 'IN' ? (
+                        <ArrowUpRight className="h-3 w-3" />
+                      ) : (
+                        <ArrowDownRight className="h-3 w-3" />
+                      )}
+                    </Badge>
+                    <div>
+                      <p className="font-medium">{movement.product.name}</p>
+                      <p className="text-sm text-gray-500">
+                        {movement.reason || 'Sin motivo'}
+                      </p>
+                    </div>
                   </div>
                   <div className="text-right">
                     <p

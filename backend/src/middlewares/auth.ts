@@ -15,7 +15,7 @@ export const authMiddleware = (req: AuthRequest, res: Response, next: NextFuncti
   const token = req.cookies?.auth_token;
 
   if (!token || typeof token !== 'string' || token.trim().length === 0) {
-    throw new AppError('Token no proporcionado', 401);
+    return next(new AppError('Token no proporcionado', 401));
   }
 
   try {
@@ -23,6 +23,6 @@ export const authMiddleware = (req: AuthRequest, res: Response, next: NextFuncti
     req.user = decoded;
     next();
   } catch {
-    throw new AppError('Token invÃ¡lido o expirado', 401);
+    return next(new AppError('Token inválido o expirado', 401));
   }
 };

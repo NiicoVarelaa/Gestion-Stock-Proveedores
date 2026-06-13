@@ -37,6 +37,8 @@ import {
   ArrowDownRight,
   ChevronLeft,
   ChevronRight,
+  Package,
+  Filter,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -71,6 +73,7 @@ export default function MovementsPage() {
   const [open, setOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [typeFilter, setTypeFilter] = useState<string | undefined>(undefined);
+  const [productFilter, setProductFilter] = useState<string | undefined>(undefined);
   const limit = 10;
 
   const form = useForm<FormData>({
@@ -83,12 +86,13 @@ export default function MovementsPage() {
       page,
       limit,
       type: (typeFilter as 'IN' | 'OUT') || undefined,
+      productId: productFilter || undefined,
     });
   };
 
   useEffect(() => {
     loadData();
-  }, [page, typeFilter]);
+  }, [page, typeFilter, productFilter]);
 
   useEffect(() => {
     fetchProducts({ limit: 100 });
@@ -99,7 +103,7 @@ export default function MovementsPage() {
       await createMovement(data);
       toast.success('Movimiento registrado');
       setOpen(false);
-      form.reset({ type: 'IN', quantity: 0, productId: '', reason: '' });
+      form.reset({ type: 'IN', quantity: 1, productId: '', reason: '' });
       loadData();
     } catch {
       toast.error('Error al registrar movimiento');
@@ -114,7 +118,7 @@ export default function MovementsPage() {
         <h1 className="text-2xl font-bold text-gray-900">Movimientos de Stock</h1>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button onClick={() => form.reset({ type: 'IN', quantity: 0, productId: '', reason: '' })}>
+            <Button onClick={() => form.reset({ type: 'IN', quantity: 1, productId: '', reason: '' })}>
               <Plus className="mr-2 h-4 w-4" />
               Nuevo Movimiento
             </Button>
@@ -134,8 +138,18 @@ export default function MovementsPage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="IN">Entrada</SelectItem>
-                    <SelectItem value="OUT">Salida</SelectItem>
+                    <SelectItem value="IN">
+                      <span className="flex items-center gap-2">
+                        <ArrowUpRight className="h-4 w-4 text-green-600" />
+                        Entrada
+                      </span>
+                    </SelectItem>
+                    <SelectItem value="OUT">
+                      <span className="flex items-center gap-2">
+                        <ArrowDownRight className="h-4 w-4 text-red-600" />
+                        Salida
+                      </span>
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -176,16 +190,33 @@ export default function MovementsPage() {
       </div>
 
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-        <Select value={typeFilter || 'all'} onValueChange={(v) => { setTypeFilter(v === 'all' ? undefined : v); setPage(1); }}>
-          <SelectTrigger className="w-full sm:w-48">
-            <SelectValue placeholder="Todos los tipos" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos los tipos</SelectItem>
-            <SelectItem value="IN">Entradas</SelectItem>
-            <SelectItem value="OUT">Salidas</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-2">
+          <Filter className="h-4 w-4 text-gray-400" />
+          <Select value={typeFilter || 'all'} onValueChange={(v) => { setTypeFilter(v === 'all' ? undefined : v); setPage(1); }}>
+            <SelectTrigger className="w-full sm:w-48">
+              <SelectValue placeholder="Todos los tipos" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos los tipos</SelectItem>
+              <SelectItem value="IN">Entradas</SelectItem>
+              <SelectItem value="OUT">Salidas</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex items-center gap-2">
+          <Package className="h-4 w-4 text-gray-400" />
+          <Select value={productFilter || 'all'} onValueChange={(v) => { setProductFilter(v === 'all' ? undefined : v); setPage(1); }}>
+            <SelectTrigger className="w-full sm:w-64">
+              <SelectValue placeholder="Todos los productos" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos los productos</SelectItem>
+              {products.map((p) => (
+                <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <div className="rounded-md border">

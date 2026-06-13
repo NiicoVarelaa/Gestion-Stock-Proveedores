@@ -1,6 +1,13 @@
 import { PrismaClient, MovementType } from '@prisma/client';
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
+
+const defaultUser = {
+  email: 'admin@mini-erp.com',
+  password: 'admin123',
+  name: 'Administrador',
+};
 
 const suppliers = [
   { name: 'TechDistribuciones S.A.', email: 'ventas@techdist.com', phone: '+54 11 4567-8901', address: 'Av. Corrientes 1234, CABA' },
@@ -80,6 +87,17 @@ async function main() {
   await prisma.product.deleteMany();
   await prisma.supplier.deleteMany();
   await prisma.user.deleteMany();
+
+  console.log('👤 Creando usuario admin...');
+  const hashedPassword = await bcrypt.hash(defaultUser.password, 10);
+  const adminUser = await prisma.user.create({
+    data: {
+      email: defaultUser.email,
+      password: hashedPassword,
+      name: defaultUser.name,
+    },
+  });
+  console.log(`  ✓ ${adminUser.email} (contraseña: ${defaultUser.password})`);
 
   console.log('📦 Creando proveedores...');
   const createdSuppliers = [];

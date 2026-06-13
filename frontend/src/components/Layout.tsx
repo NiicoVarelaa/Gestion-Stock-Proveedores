@@ -19,7 +19,12 @@ export default function Layout() {
   const navContent = (
     <>
       <div className="p-6">
-        <h1 className="text-xl font-bold text-gray-900 mb-8">Mini ERP</h1>
+        <div className="flex items-center gap-3 mb-8">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600">
+            <Package className="h-5 w-5 text-white" />
+          </div>
+          <h1 className="text-xl font-bold text-gray-900">Mini ERP</h1>
+        </div>
         <nav className="space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -29,13 +34,16 @@ export default function Layout() {
                 key={item.path}
                 to={item.path}
                 onClick={() => setMobileOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors relative ${
                   isActive
-                    ? 'bg-gray-900 text-white'
+                    ? 'bg-blue-50 text-blue-700'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
-                <Icon className="h-4 w-4" />
+                {isActive && (
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r-full bg-blue-600" />
+                )}
+                <Icon className={`h-4 w-4 ${isActive ? 'text-blue-600' : ''}`} />
                 {item.label}
               </Link>
             );
