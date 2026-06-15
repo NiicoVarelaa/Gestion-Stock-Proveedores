@@ -3,6 +3,7 @@ import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Package, Truck, ArrowLeftRight, LayoutDashboard, LogOut, User, Menu, X } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
 import { Button } from '@/components/ui/button';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 const navItems = [
   { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
@@ -71,7 +72,8 @@ export default function Layout() {
   );
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <TooltipProvider>
+      <div className="flex h-screen bg-gray-50">
       {/* Mobile overlay */}
       {mobileOpen && (
         <div
@@ -111,5 +113,6 @@ export default function Layout() {
         </main>
       </div>
     </div>
+    </TooltipProvider>
   );
 }
