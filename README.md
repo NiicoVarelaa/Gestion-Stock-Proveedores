@@ -5,6 +5,7 @@
 ![Prisma](https://img.shields.io/badge/Prisma-5.x-purple)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-blue)
 ![React](https://img.shields.io/badge/React-19.x-61dafb)
+![Cloudinary](https://img.shields.io/badge/Cloudinary-3448C5)
 ![Chart.js](https://img.shields.io/badge/Chart.js-4.x-ff6384)
 
 Sistema de gestión de inventario para tiendas electrónicas. Dashboard con métricas en tiempo real, gráficos interactivos, gestión de proveedores, productos y movimientos de stock. Desarrollado como proyecto de portfolio demostrando arquitectura limpia, código tipado y operaciones transaccionales.
@@ -51,12 +52,14 @@ Sistema de gestión de inventario para tiendas electrónicas. Dashboard con mét
 - **Autenticación JWT** con cookies httpOnly y protección CSRF
 - **CRUD completo** de Proveedores y Productos
 - **Movimientos de stock** con transacciones ACID y aislamiento serializable
+- **Imágenes de productos** con subida a Cloudinary y soporte de URL externa
 - **Alertas de stock mínimo** en tiempo real
 - **Diseño responsive** con sidebar colapsable en móvil
 - **Validación end-to-end** con Zod
-- **Seed de datos** realistas para demo (30 productos, 8 proveedores, 100+ movimientos)
+- **Seed de datos** realistas para demo (30 productos, 8 proveedores, 100+ movimientos, 1 admin)
 - **Paginación persistente** que mantiene la página actual tras mutaciones
 - **Recuperación de contraseña** con código por email (Gmail SMTP, expiración 10 min)
+- **UX/UI mejorado**: iconos en formularios, tooltips, indicadores de paso, bordes de color en métricas
 
 ## Tech Stack
 
@@ -71,6 +74,7 @@ Sistema de gestión de inventario para tiendas electrónicas. Dashboard con mét
 | Forms | React Hook Form + Zod |
 | Charts | Chart.js + react-chartjs-2 |
 | Notifications | Sonner |
+| File Upload | Multer + Cloudinary |
 
 ## Arquitectura
 
@@ -88,7 +92,7 @@ pnpm install
 cp .env.example .env  # Configurar DATABASE_URL
 npx prisma generate
 npx prisma migrate dev
-pnpm run prisma:seed  # Cargar datos de demo
+pnpm run prisma:seed  # Cargar datos de demo (admin: admin@mini-erp.com / admin123)
 pnpm run dev
 ```
 
@@ -120,6 +124,9 @@ pnpm run dev
 | POST | `/api/auth/forgot-password` | Solicitar código de recuperación |
 | POST | `/api/auth/verify-code` | Verificar código de recuperación |
 | POST | `/api/auth/reset-password` | Restablecer contraseña |
+| GET | `/api/auth/me` | Obtener usuario actual |
+| POST | `/api/auth/logout` | Cerrar sesión |
+| PATCH | `/api/products/:id/image` | Actualizar imagen de producto |
 
 ## Transacciones ACID
 
@@ -150,13 +157,33 @@ prisma.$transaction(async (tx) => {
 - **Password hashing** con bcrypt (mínimo 8 caracteres)
 - **Variables de entorno** validadas al inicio del servidor
 
+## Imágenes de Productos
+
+Las imágenes de productos se pueden subir desde el formulario de creación/edición como archivo (JPG, PNG, WebP — máx 5MB) o pegando una URL externa.
+
+### Almacenamiento con Cloudinary
+
+1. Crear cuenta gratuita en [Cloudinary](https://cloudinary.com)
+2. Copiar las credenciales del Dashboard (`Cloud name`, `API Key`, `API Secret`)
+3. Agregar al `.env` del backend:
+   ```env
+   CLOUDINARY_CLOUD_NAME=tu-cloud-name
+   CLOUDINARY_API_KEY=tu-api-key
+   CLOUDINARY_API_SECRET=tu-api-secret
+   ```
+4. Si no se configuran variables de Cloudinary, se puede usar el campo `imageUrl` con una URL externa
+
+### Fallback
+
+Si un producto no tiene imagen, se muestra un placeholder con el icono `Package` en la tabla, alertas de stock bajo y dashboard.
+
 ## Estructura del Proyecto
 
 ```
 mini-erp/
 ├── backend/
 │   ├── src/
-│   │   ├── config/          # Database, env validation
+│   │   ├── config/          # Database, env validation, Cloudinary
 │   │   ├── routes/          # Express routers
 │   │   ├── controllers/     # Request handlers
 │   │   ├── services/        # Business logic
@@ -165,12 +192,12 @@ mini-erp/
 │   │   ├── app.ts           # Express app setup
 │   │   └── server.ts        # Entry point
 │   ├── prisma/
-│   │   ├── schema.prisma    # Data models
-│   │   └── seed.ts          # Demo data seeder
+│   │   ├── schema.prisma    # Data models (User, Supplier, Product, StockMovement, PasswordReset)
+│   │   └── seed.ts          # Demo data seeder (electronics store)
 │   └── package.json
 ├── frontend/
 │   └── src/
-│       ├── components/      # Reusable UI (Shadcn)
+│       ├── components/      # Reusable UI (Shadcn + custom)
 │       ├── pages/           # Page components
 │       ├── services/        # API client with interceptors
 │       ├── store/           # Zustand stores
@@ -199,11 +226,15 @@ mini-erp/
    - `JWT_SECRET`: Clave secreta de al menos 32 caracteres
    - `SMTP_USER`: Email de Gmail para envío de códigos de recuperación
    - `SMTP_PASS`: Contraseña de aplicación de Gmail (App Password)
+   - `CLOUDINARY_CLOUD_NAME`: Cloud name de Cloudinary
+   - `CLOUDINARY_API_KEY`: API Key de Cloudinary
+   - `CLOUDINARY_API_SECRET`: API Secret de Cloudinary
 5. Ejecutar migraciones y seed:
    ```bash
    npx prisma migrate deploy
    npx ts-node prisma/seed.ts
    ```
+   El seed crea un usuario admin por defecto: `admin@mini-erp.com` / `admin123`
 
 ### Frontend en Vercel
 
