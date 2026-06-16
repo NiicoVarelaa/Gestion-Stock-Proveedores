@@ -1,7 +1,7 @@
 {
-  "name": "mini-erp-backend",
+  "name": "stockflow-backend",
   "version": "1.0.0",
-  "description": "Mini ERP - Stock & Supplier Management API",
+  "description": "StockFlow - Stock & Supplier Management API",
   "main": "dist/server.js",
   "scripts": {
     "dev": "nodemon src/server.ts",

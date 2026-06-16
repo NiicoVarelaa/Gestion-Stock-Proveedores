@@ -1,4 +1,4 @@
-# Mini ERP - Stock & Supplier Management
+# StockFlow - Stock & Supplier Management
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)
 ![Node.js](https://img.shields.io/badge/Node.js-20.x-green)
@@ -92,7 +92,7 @@ pnpm install
 cp .env.example .env  # Configurar DATABASE_URL
 npx prisma generate
 npx prisma migrate dev
-pnpm run prisma:seed  # Cargar datos de demo (admin: admin@mini-erp.com / admin123)
+pnpm run prisma:seed  # Cargar datos de demo (admin: admin@stockflow.app / admin123)
 pnpm run dev
 ```
 
@@ -234,7 +234,7 @@ mini-erp/
    npx prisma migrate deploy
    npx ts-node prisma/seed.ts
    ```
-   El seed crea un usuario admin por defecto: `admin@mini-erp.com` / `admin123`
+   El seed crea un usuario admin por defecto: `admin@stockflow.app` / `admin123`
 
 ### Frontend en Vercel
 

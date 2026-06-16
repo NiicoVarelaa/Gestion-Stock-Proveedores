@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 const defaultUser = {
-  email: 'admin@mini-erp.com',
+  email: 'admin@stockflow.app',
   password: 'admin123',
   name: 'Administrador',
 };

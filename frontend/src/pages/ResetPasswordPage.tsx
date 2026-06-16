@@ -94,7 +94,7 @@ export default function ResetPasswordPage() {
             <Package className="h-7 w-7 text-white" />
           </div>
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900">Mini ERP</h1>
+            <h1 className="text-2xl font-bold text-gray-900">StockFlow</h1>
             <p className="text-sm text-gray-500">Gestión de Stock y Proveedores</p>
           </div>
         </div>
@@ -261,7 +261,7 @@ export default function ResetPasswordPage() {
         </Card>
 
         <p className="text-center text-xs text-gray-400">
-          Mini ERP &copy; {new Date().getFullYear()}
+          StockFlow &copy; {new Date().getFullYear()}
         </p>
       </div>
     </div>

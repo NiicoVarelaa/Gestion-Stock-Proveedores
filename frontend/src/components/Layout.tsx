@@ -24,7 +24,7 @@ export default function Layout() {
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600">
             <Package className="h-5 w-5 text-white" />
           </div>
-          <h1 className="text-xl font-bold text-gray-900">Mini ERP</h1>
+          <h1 className="text-xl font-bold text-gray-900">StockFlow</h1>
         </div>
         <nav className="space-y-1">
           {navItems.map((item) => {
@@ -105,7 +105,7 @@ export default function Layout() {
           <Button variant="ghost" size="icon" onClick={() => setMobileOpen(true)}>
             <Menu className="h-5 w-5" />
           </Button>
-          <h1 className="text-lg font-bold text-gray-900">Mini ERP</h1>
+          <h1 className="text-lg font-bold text-gray-900">StockFlow</h1>
         </header>
 
         <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8">

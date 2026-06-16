@@ -7,7 +7,7 @@ import type { CreateProductInput, UpdateProductInput } from '../routes/product.s
 const uploadToCloudinary = (file: Express.Multer.File): Promise<string> => {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
-      { folder: 'mini-erp/products', format: 'webp', quality: 'auto' },
+      { folder: 'stockflow/products', format: 'webp', quality: 'auto' },
       (error, result) => {
         if (error || !result) return reject(error || new Error('Error subiendo imagen'));
         resolve(result.secure_url);

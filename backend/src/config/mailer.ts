@@ -11,9 +11,9 @@ export const transporter = nodemailer.createTransport({
 
 export async function sendPasswordResetEmail(email: string, name: string, code: string) {
   await transporter.sendMail({
-    from: `"Mini ERP" <${env.smtpUser}>`,
+    from: `"StockFlow" <${env.smtpUser}>`,
     to: email,
-    subject: 'Recuperar contraseña - Mini ERP',
+    subject: 'Recuperar contraseña - StockFlow',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #1a1a1a;">Recuperar contraseña</h2>
