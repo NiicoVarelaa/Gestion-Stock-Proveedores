@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { FormFieldError } from '@/components/FormFieldError';
 import { ProductImageWithFallback } from '@/components/ProductImage';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -310,7 +311,8 @@ export default function ProductsPage() {
         </Select>
       </div>
 
-      <div className="rounded-md border">
+      {/* Desktop table */}
+      <div className="hidden md:block rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
@@ -369,6 +371,65 @@ export default function ProductsPage() {
             )}
           </TableBody>
         </Table>
+      </div>
+
+      {/* Mobile cards */}
+      <div className="block md:hidden space-y-3">
+        {loading ? (
+          Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="rounded-lg border p-4 space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-md bg-gray-200 animate-pulse" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
+                  <div className="h-3 w-20 bg-gray-200 rounded animate-pulse" />
+                </div>
+              </div>
+              <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+              <div className="h-5 w-14 bg-gray-200 rounded animate-pulse" />
+            </div>
+          ))
+        ) : products.length === 0 ? (
+          <p className="text-center text-gray-500 py-8">No hay productos registrados</p>
+        ) : (
+          products.map((product) => {
+            const low = isLowStock(product);
+            return (
+              <Card key={product.id}>
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-3">
+                    <ProductImageWithFallback
+                      src={product.imageUrl}
+                      alt={product.name}
+                      className="h-12 w-12"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-gray-900 truncate">{product.name}</p>
+                      <p className="text-sm text-gray-500">{product.category}</p>
+                      <div className="mt-2 flex items-center gap-3">
+                        <span className="font-semibold text-gray-900">${Number(product.price).toFixed(2)}</span>
+                        <Badge variant={low ? 'destructive' : 'secondary'}>
+                          {product.stock} uds
+                        </Badge>
+                      </div>
+                      <p className="mt-1 text-sm text-gray-500 truncate">{product.supplier.name}</p>
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-2 mt-3 pt-3 border-t border-gray-100">
+                    <Button variant="ghost" size="sm" onClick={() => handleOpen(product)}>
+                      <Pencil className="h-4 w-4 mr-1" />
+                      Editar
+                    </Button>
+                    <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => handleDelete(product.id)}>
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      Eliminar
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })
+        )}
       </div>
 
       {totalPages > 1 && (

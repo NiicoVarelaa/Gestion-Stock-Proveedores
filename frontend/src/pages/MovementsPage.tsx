@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { FormFieldError } from '@/components/FormFieldError';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
@@ -39,6 +40,7 @@ import {
   ChevronRight,
   Package,
   Filter,
+  Calendar,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -219,7 +221,8 @@ export default function MovementsPage() {
         </div>
       </div>
 
-      <div className="rounded-md border">
+      {/* Desktop table */}
+      <div className="hidden md:block rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
@@ -265,6 +268,51 @@ export default function MovementsPage() {
             )}
           </TableBody>
         </Table>
+      </div>
+
+      {/* Mobile cards */}
+      <div className="block md:hidden space-y-3">
+        {loading ? (
+          Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="rounded-lg border p-4 space-y-3">
+              <div className="h-5 w-40 bg-gray-200 rounded animate-pulse" />
+              <div className="h-5 w-20 bg-gray-200 rounded animate-pulse" />
+              <div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
+            </div>
+          ))
+        ) : movements.length === 0 ? (
+          <p className="text-center text-gray-500 py-8">No hay movimientos registrados</p>
+        ) : (
+          movements.map((movement) => (
+            <Card key={movement.id}>
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between gap-2">
+                  <p className="font-medium text-gray-900 flex-1 min-w-0 truncate">{movement.product.name}</p>
+                  <Badge variant={movement.type === 'IN' ? 'default' : 'destructive'} className="flex-shrink-0 gap-1">
+                    {movement.type === 'IN' ? (
+                      <ArrowUpRight className="h-3 w-3" />
+                    ) : (
+                      <ArrowDownRight className="h-3 w-3" />
+                    )}
+                    {movement.type === 'IN' ? 'Entrada' : 'Salida'}
+                  </Badge>
+                </div>
+                <div className="mt-2 flex items-center justify-between">
+                  <span className={movement.type === 'IN' ? 'text-lg font-bold text-green-600' : 'text-lg font-bold text-orange-600'}>
+                    {movement.type === 'IN' ? '+' : '-'}{movement.quantity} uds
+                  </span>
+                  <span className="text-sm text-gray-500 flex items-center gap-1">
+                    <Calendar className="h-3.5 w-3.5" />
+                    {new Date(movement.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+                {movement.reason && (
+                  <p className="mt-2 text-sm text-gray-500">{movement.reason}</p>
+                )}
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
 
       {totalPages > 1 && (

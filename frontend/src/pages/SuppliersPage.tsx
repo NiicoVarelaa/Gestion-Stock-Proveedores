@@ -23,6 +23,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import { Plus, Pencil, Trash2, ChevronLeft, ChevronRight, Search, Mail, Phone, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Supplier } from '@/types';
@@ -178,14 +179,15 @@ export default function SuppliersPage() {
         />
       </div>
 
-      <div className="rounded-md border">
+      {/* Desktop table */}
+      <div className="hidden md:block rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Nombre</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Teléfono</TableHead>
-              <TableHead className="hidden sm:table-cell">Dirección</TableHead>
+              <TableHead className="hidden lg:table-cell">Dirección</TableHead>
               <TableHead>Estado</TableHead>
               <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
@@ -205,7 +207,7 @@ export default function SuppliersPage() {
                   <TableCell className="font-medium">{supplier.name}</TableCell>
                   <TableCell>{supplier.email}</TableCell>
                   <TableCell>{supplier.phone || '-'}</TableCell>
-                  <TableCell className="hidden sm:table-cell text-gray-500 text-sm">{supplier.address || '-'}</TableCell>
+                  <TableCell className="hidden lg:table-cell text-gray-500 text-sm">{supplier.address || '-'}</TableCell>
                   <TableCell>
                     <Badge variant={supplier.active ? 'default' : 'destructive'}>
                       {supplier.active ? 'Activo' : 'Inactivo'}
@@ -238,6 +240,67 @@ export default function SuppliersPage() {
             )}
           </TableBody>
         </Table>
+      </div>
+
+      {/* Mobile cards */}
+      <div className="block md:hidden space-y-3">
+        {loading ? (
+          Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="rounded-lg border p-4 space-y-3">
+              <div className="h-5 w-32 bg-gray-200 rounded animate-pulse" />
+              <div className="h-4 w-40 bg-gray-200 rounded animate-pulse" />
+              <div className="h-4 w-24 bg-gray-200 rounded animate-pulse" />
+              <div className="h-5 w-14 bg-gray-200 rounded animate-pulse" />
+            </div>
+          ))
+        ) : suppliers.length === 0 ? (
+          <p className="text-center text-gray-500 py-8">No hay proveedores registrados</p>
+        ) : (
+          suppliers.map((supplier) => (
+            <Card key={supplier.id}>
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-gray-900 truncate">{supplier.name}</p>
+                    <div className="mt-2 space-y-1 text-sm text-gray-500">
+                      <div className="flex items-center gap-1.5">
+                        <Mail className="h-3.5 w-3.5" />
+                        <span className="truncate">{supplier.email}</span>
+                      </div>
+                      {supplier.phone && (
+                        <div className="flex items-center gap-1.5">
+                          <Phone className="h-3.5 w-3.5" />
+                          <span>{supplier.phone}</span>
+                        </div>
+                      )}
+                      {supplier.address && (
+                        <div className="flex items-start gap-1.5">
+                          <MapPin className="h-3.5 w-3.5 mt-0.5 flex-shrink-0" />
+                          <span className="text-xs">{supplier.address}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <Badge variant={supplier.active ? 'default' : 'destructive'} className="flex-shrink-0">
+                    {supplier.active ? 'Activo' : 'Inactivo'}
+                  </Badge>
+                </div>
+                <div className="flex justify-end gap-2 mt-3 pt-3 border-t border-gray-100">
+                  <Button variant="ghost" size="sm" onClick={() => handleOpen(supplier)}>
+                    <Pencil className="h-4 w-4 mr-1" />
+                    Editar
+                  </Button>
+                  {supplier.active && (
+                    <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => handleDeactivate(supplier.id)}>
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      Desactivar
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
 
       {totalPages > 1 && (
