@@ -50,6 +50,8 @@ export class StockMovementService {
     type?: 'IN' | 'OUT';
     from?: string;
     to?: string;
+    supplierId?: string;
+    category?: string;
   }) {
     const skip = (page - 1) * limit;
     const where: Record<string, unknown> = {};
@@ -61,6 +63,13 @@ export class StockMovementService {
       if (filters.from) dateFilter.gte = new Date(filters.from);
       if (filters.to) dateFilter.lte = new Date(filters.to);
       where.createdAt = dateFilter;
+    }
+
+    const productFilter: Record<string, unknown> = {};
+    if (filters.supplierId) productFilter.supplierId = filters.supplierId;
+    if (filters.category) productFilter.category = filters.category;
+    if (Object.keys(productFilter).length > 0) {
+      where.product = productFilter;
     }
 
     const [data, total] = await Promise.all([

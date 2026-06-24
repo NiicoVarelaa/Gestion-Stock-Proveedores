@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMovementStore } from '@/store/movement.store';
 import { useProductStore } from '@/store/product.store';
+import { useSupplierStore } from '@/store/supplier.store';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -72,11 +73,15 @@ function TableSkeleton() {
 export default function MovementsPage() {
   const { movements, total, loading, fetchMovements, createMovement } = useMovementStore();
   const { products, fetchProducts } = useProductStore();
+  const { suppliers, fetchSuppliers } = useSupplierStore();
   const [open, setOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [typeFilter, setTypeFilter] = useState<string | undefined>(undefined);
-  const [productFilter, setProductFilter] = useState<string | undefined>(undefined);
+  const [supplierFilter, setSupplierFilter] = useState<string | undefined>(undefined);
+  const [categoryFilter, setCategoryFilter] = useState<string | undefined>(undefined);
   const limit = 10;
+
+  const categories = [...new Set(products.map((p) => p.category))].sort();
 
   const form = useForm<FormData>({
     resolver: zodResolver(movementSchema),
@@ -88,16 +93,18 @@ export default function MovementsPage() {
       page,
       limit,
       type: (typeFilter as 'IN' | 'OUT') || undefined,
-      productId: productFilter || undefined,
+      supplierId: supplierFilter || undefined,
+      category: categoryFilter || undefined,
     });
   };
 
   useEffect(() => {
     loadData();
-  }, [page, typeFilter, productFilter]);
+  }, [page, typeFilter, supplierFilter, categoryFilter]);
 
   useEffect(() => {
     fetchProducts({ limit: 100 });
+    fetchSuppliers({ limit: 100 });
   }, []);
 
   const onSubmit = async (data: FormData) => {
@@ -207,14 +214,28 @@ export default function MovementsPage() {
         </div>
         <div className="flex items-center gap-2">
           <Package className="h-4 w-4 text-gray-400" />
-          <Select value={productFilter || 'all'} onValueChange={(v) => { setProductFilter(v === 'all' ? undefined : v); setPage(1); }}>
-            <SelectTrigger className="w-full sm:w-64">
-              <SelectValue placeholder="Todos los productos" />
+          <Select value={supplierFilter || 'all'} onValueChange={(v) => { setSupplierFilter(v === 'all' ? undefined : v); setPage(1); }}>
+            <SelectTrigger className="w-full sm:w-48">
+              <SelectValue placeholder="Todos los proveedores" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos los productos</SelectItem>
-              {products.map((p) => (
-                <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+              <SelectItem value="all">Todos los proveedores</SelectItem>
+              {suppliers.map((s) => (
+                <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex items-center gap-2">
+          <Filter className="h-4 w-4 text-gray-400" />
+          <Select value={categoryFilter || 'all'} onValueChange={(v) => { setCategoryFilter(v === 'all' ? undefined : v); setPage(1); }}>
+            <SelectTrigger className="w-full sm:w-44">
+              <SelectValue placeholder="Todas las categorías" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todas las categorías</SelectItem>
+              {categories.map((cat) => (
+                <SelectItem key={cat} value={cat}>{cat}</SelectItem>
               ))}
             </SelectContent>
           </Select>

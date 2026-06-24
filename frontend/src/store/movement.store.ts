@@ -7,8 +7,8 @@ interface MovementStore {
   total: number;
   loading: boolean;
   error: string | null;
-  lastFetchParams: { page?: number; limit?: number; productId?: string; type?: 'IN' | 'OUT'; from?: string; to?: string };
-  fetchMovements: (params?: { page?: number; limit?: number; productId?: string; type?: 'IN' | 'OUT'; from?: string; to?: string }) => Promise<void>;
+  lastFetchParams: { page?: number; limit?: number; productId?: string; type?: 'IN' | 'OUT'; from?: string; to?: string; supplierId?: string; category?: string };
+  fetchMovements: (params?: { page?: number; limit?: number; productId?: string; type?: 'IN' | 'OUT'; from?: string; to?: string; supplierId?: string; category?: string }) => Promise<void>;
   createMovement: (data: { type: 'IN' | 'OUT'; quantity: number; productId: string; reason?: string }) => Promise<void>;
 }
 

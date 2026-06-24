@@ -28,7 +28,9 @@ export class StockMovementController {
       const type = getQueryParam(req.query, 'type') as 'IN' | 'OUT' | undefined;
       const from = getQueryParam(req.query, 'from');
       const to = getQueryParam(req.query, 'to');
-      const result = await movementService.findAll(page, limit, { productId, type, from, to });
+      const supplierId = getQueryParam(req.query, 'supplierId');
+      const category = getQueryParam(req.query, 'category');
+      const result = await movementService.findAll(page, limit, { productId, type, from, to, supplierId, category });
       res.json({ success: true, ...result });
     } catch (error) {
       next(error);

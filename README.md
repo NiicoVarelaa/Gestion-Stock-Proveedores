@@ -12,32 +12,29 @@ Sistema de gestión de inventario para tiendas electrónicas. Dashboard con mét
 
 ## Screenshots
 
-> Reemplazar con capturas reales del sistema
+### Desktop
 
-### Dashboard
+| Login | Registro |
+|-------|----------|
+| ![Login](./screenshots/Mini-ERP-Desktop/Login.png) | ![Registro](./screenshots/Mini-ERP-Desktop/Registro.png) |
 
-![Dashboard](./screenshots/dashboard.png)
-*Dashboard con métricas clave, gráficos de tendencias y alertas de stock bajo*
+| Dashboard | Dashboard Métricas |
+|-----------|-------------------|
+| ![Dashboard](./screenshots/Mini-ERP-Desktop/Dashboard.png) | ![Dashboard Métricas](./screenshots/Mini-ERP-Desktop/Dashboard2.png) |
 
-### Gestión de Productos
+| Productos | Proveedores | Movimientos |
+|-----------|-------------|-------------|
+| ![Productos](./screenshots/Mini-ERP-Desktop/Productos.png) | ![Proveedores](./screenshots/Mini-ERP-Desktop/Proveedores.png) | ![Movimientos](./screenshots/Mini-ERP-Desktop/Movimientos.png) |
 
-![Productos](./screenshots/products.png)
-*Listado de productos con búsqueda, filtros por categoría y paginación*
+### Mobile
 
-### Gestión de Proveedores
+| Login | Dashboard | Productos |
+|-------|-----------|-----------|
+| ![Login Mobile](./screenshots/Mini-ERP-Mobile/LoginMobile.png) | ![Dashboard Mobile](./screenshots/Mini-ERP-Mobile/DashboardMobile.png) | ![Productos Mobile](./screenshots/Mini-ERP-Mobile/ProductosMobile.png) |
 
-![Proveedores](./screenshots/suppliers.png)
-*CRUD completo de proveedores con búsqueda y estados activo/inactivo*
-
-### Movimientos de Stock
-
-![Movimientos](./screenshots/movements.png)
-*Historial de entradas y salidas de stock con filtros por tipo*
-
-### Vista Móvil
-
-![Mobile](./screenshots/mobile.png)
-*Interfaz responsive adaptada para dispositivos móviles*
+| Proveedores | Movimientos |
+|-------------|-------------|
+| ![Proveedores Mobile](./screenshots/Mini-ERP-Mobile/ProveedoresMobile.png) | ![Movimientos Mobile](./screenshots/Mini-ERP-Mobile/MovimientosMobile.png) |
 
 ## Demo
 

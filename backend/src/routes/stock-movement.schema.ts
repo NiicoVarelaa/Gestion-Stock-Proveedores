@@ -23,6 +23,8 @@ export const listMovementsSchema = z.object({
     type: z.enum(['IN', 'OUT']).optional(),
     from: z.string().datetime().optional(),
     to: z.string().datetime().optional(),
+    supplierId: z.string().uuid().optional(),
+    category: z.string().optional(),
   }),
 });
 
