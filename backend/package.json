@@ -1,7 +1,7 @@
 {
   "name": "stockflow-backend",
   "version": "1.0.0",
-  "description": "StockFlow - Stock & Supplier Management API",
+  "description": "Flow Stock - Stock & Supplier Management API",
   "main": "dist/server.js",
   "scripts": {
     "dev": "nodemon src/server.ts",

@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Mail, Key, Lock, Package, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Mail, Key, Lock, Eye, EyeOff } from 'lucide-react';
 
 const emailSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -90,13 +90,11 @@ export default function ResetPasswordPage() {
       <div className="w-full max-w-md space-y-6">
         {/* Logo / Brand */}
         <div className="flex flex-col items-center gap-3">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-600 shadow-lg shadow-blue-600/25">
-            <Package className="h-7 w-7 text-white" />
-          </div>
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900">StockFlow</h1>
-            <p className="text-sm text-gray-500">Gestión de Stock y Proveedores</p>
-          </div>
+          <img
+            src="/LogoFlowStock.webp"
+            alt="Flow Stock Logo"
+            className="h-28 w-auto"
+          />
         </div>
 
         <Card className="border-0 shadow-xl shadow-gray-200/50">
@@ -261,7 +259,7 @@ export default function ResetPasswordPage() {
         </Card>
 
         <p className="text-center text-xs text-gray-400">
-          StockFlow &copy; {new Date().getFullYear()}
+          Flow Stock &copy; {new Date().getFullYear()}
         </p>
       </div>
     </div>

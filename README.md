@@ -1,4 +1,4 @@
-# StockFlow - Stock & Supplier Management
+# Flow Stock - Stock & Supplier Management
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)
 ![Node.js](https://img.shields.io/badge/Node.js-20.x-green)
@@ -8,33 +8,37 @@
 ![Cloudinary](https://img.shields.io/badge/Cloudinary-3448C5)
 ![Chart.js](https://img.shields.io/badge/Chart.js-4.x-ff6384)
 
+<p align="center">
+  <img src="./LogoFlowStock.png" alt="Flow Stock Logo" width="200">
+</p>
+
 Sistema de gestión de inventario para tiendas electrónicas. Dashboard con métricas en tiempo real, gráficos interactivos, gestión de proveedores, productos y movimientos de stock. Desarrollado como proyecto de portfolio demostrando arquitectura limpia, código tipado y operaciones transaccionales.
 
 ## Screenshots
 
 ### Desktop
 
-| Login | Registro |
-|-------|----------|
-| ![Login](./screenshots/Mini-ERP-Desktop/Login.png) | ![Registro](./screenshots/Mini-ERP-Desktop/Registro.png) |
+| Login | Registro | Recuperar Contraseña |
+|-------|----------|----------------------|
+| ![Login](./screenshots/Mini-ERP-Desktop/Login.webp) | ![Registro](./screenshots/Mini-ERP-Desktop/Registro.webp) | ![Recuperar Contraseña](./screenshots/Mini-ERP-Desktop/Recuperar-Contraseña.webp) |
 
-| Dashboard | Dashboard Métricas |
-|-----------|-------------------|
-| ![Dashboard](./screenshots/Mini-ERP-Desktop/Dashboard.png) | ![Dashboard Métricas](./screenshots/Mini-ERP-Desktop/Dashboard2.png) |
+| Dashboard 1 | Dashboard 2 |
+|-------------|-------------|
+| ![Dashboard](./screenshots/Mini-ERP-Desktop/Dashboard-1.webp) | ![Dashboard Métricas](./screenshots/Mini-ERP-Desktop/Dashboard-2.webp) |
 
 | Productos | Proveedores | Movimientos |
 |-----------|-------------|-------------|
-| ![Productos](./screenshots/Mini-ERP-Desktop/Productos.png) | ![Proveedores](./screenshots/Mini-ERP-Desktop/Proveedores.png) | ![Movimientos](./screenshots/Mini-ERP-Desktop/Movimientos.png) |
+| ![Productos](./screenshots/Mini-ERP-Desktop/Productos.webp) | ![Proveedores](./screenshots/Mini-ERP-Desktop/Proveedores.webp) | ![Movimientos](./screenshots/Mini-ERP-Desktop/Movimientos.webp) |
 
 ### Mobile
 
-| Login | Dashboard | Productos |
-|-------|-----------|-----------|
-| ![Login Mobile](./screenshots/Mini-ERP-Mobile/LoginMobile.png) | ![Dashboard Mobile](./screenshots/Mini-ERP-Mobile/DashboardMobile.png) | ![Productos Mobile](./screenshots/Mini-ERP-Mobile/ProductosMobile.png) |
+| Auth | Dashboard | Productos |
+|------|-----------|-----------|
+| ![Auth Mobile](./screenshots/Mini-ERP-Mobile/Auth.webp) | ![Dashboard Mobile](./screenshots/Mini-ERP-Mobile/Dashboard.webp) | ![Productos Mobile](./screenshots/Mini-ERP-Mobile/Productos.webp) |
 
 | Proveedores | Movimientos |
 |-------------|-------------|
-| ![Proveedores Mobile](./screenshots/Mini-ERP-Mobile/ProveedoresMobile.png) | ![Movimientos Mobile](./screenshots/Mini-ERP-Mobile/MovimientosMobile.png) |
+| ![Proveedores Mobile](./screenshots/Mini-ERP-Mobile/Proveedores.webp) | ![Movimientos Mobile](./screenshots/Mini-ERP-Mobile/Movimientos.webp) |
 
 ## Demo
 
