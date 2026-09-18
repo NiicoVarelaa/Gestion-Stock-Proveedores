@@ -138,12 +138,12 @@ export class ProductService {
   }
 
   async getLowStock() {
-    return prisma.product.findMany({
-      where: {
-        stock: { lte: prisma.product.fields.minStock },
-      },
-      include: { supplier: { select: { id: true, name: true, email: true } } },
-      orderBy: { stock: 'asc' },
-    });
+    return prisma.$queryRaw`
+      SELECT p.*, json_build_object('id', s.id, 'name', s.name, 'email', s.email) AS supplier
+      FROM "Product" p
+      JOIN "Supplier" s ON s.id = p."supplierId"
+      WHERE p."stock" <= p."minStock"
+      ORDER BY p."stock" ASC
+    `;
   }
 }

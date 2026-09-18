@@ -17,9 +17,9 @@ export class DashboardService {
       prisma.product.count(),
       prisma.supplier.count({ where: { active: true } }),
       prisma.stockMovement.count(),
-      prisma.product.count({
-        where: { stock: { lte: prisma.product.fields.minStock } },
-      }),
+      prisma.$queryRaw<[{ count: bigint }]>`
+        SELECT COUNT(*)::int as count FROM "Product" WHERE "stock" <= "minStock"
+      `,
       prisma.product.aggregate({
         _sum: { stock: true },
       }),
@@ -105,7 +105,7 @@ export class DashboardService {
       totalProducts,
       totalSuppliers,
       totalMovements,
-      lowStockCount: lowStockProducts,
+      lowStockCount: Number(lowStockProducts[0]?.count ?? 0),
       totalStockUnits: totalStockValue._sum.stock || 0,
       totalInventoryValue,
       categoryDistribution,
