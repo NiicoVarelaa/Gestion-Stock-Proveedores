@@ -42,7 +42,6 @@ describe('StockMovementService', () => {
 
       mockPrisma.$transaction.mockImplementation(async (fn: any) => {
         const tx = {
-          product: { findUnique: txMock.product.findUnique },
           stockMovement: { create: txMock.stockMovement.create },
           product: {
             findUnique: txMock.product.findUnique,
