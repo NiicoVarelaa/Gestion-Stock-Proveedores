@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 import Layout from './Layout';
+import { ThemeProvider } from './ThemeProvider';
 import { useAuthStore } from '@/store/auth.store';
 
 vi.mock('@/services/api', () => ({
@@ -24,9 +25,11 @@ function renderLayout(initialRoute = '/') {
   });
 
   return render(
-    <MemoryRouter initialEntries={[initialRoute]}>
-      <Layout />
-    </MemoryRouter>
+    <ThemeProvider>
+      <MemoryRouter initialEntries={[initialRoute]}>
+        <Layout />
+      </MemoryRouter>
+    </ThemeProvider>
   );
 }
 
@@ -65,7 +68,7 @@ describe('Layout', () => {
   it('resalta la ruta activa', () => {
     renderLayout('/products');
     const productsLinks = screen.getAllByText('Productos');
-    const activeLink = productsLinks.find(el => el.closest('a')?.classList.contains('bg-blue-50'));
+    const activeLink = productsLinks.find(el => el.closest('a')?.classList.contains('bg-sidebar-accent'));
     expect(activeLink).toBeInTheDocument();
   });
 
@@ -73,7 +76,7 @@ describe('Layout', () => {
     renderLayout('/products');
     const productsLinks = screen.getAllByText('Productos');
     const linkWithIndicator = productsLinks.find(el =>
-      el.closest('a')?.querySelector('.bg-blue-600')
+      el.closest('a')?.querySelector('.bg-primary')
     );
     expect(linkWithIndicator).toBeInTheDocument();
   });

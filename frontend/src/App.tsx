@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { ThemeProvider } from '@/components/ThemeProvider';
 import Layout from '@/components/Layout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import LoginPage from '@/pages/LoginPage';
@@ -19,8 +20,9 @@ function App() {
   }, []);
 
   return (
-    <ErrorBoundary>
-      <BrowserRouter>
+    <ThemeProvider>
+      <ErrorBoundary>
+        <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
@@ -38,7 +40,8 @@ function App() {
           </Route>
         </Routes>
       </BrowserRouter>
-    </ErrorBoundary>
+      </ErrorBoundary>
+    </ThemeProvider>
   );
 }
 
