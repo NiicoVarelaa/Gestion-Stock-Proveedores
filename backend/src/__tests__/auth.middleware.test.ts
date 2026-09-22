@@ -24,7 +24,7 @@ describe('authMiddleware', () => {
     const res = {} as any;
     const next = vi.fn();
 
-    authMiddleware(req, res, next);
+    authMiddleware()(req, res, next);
 
     expect(next).toHaveBeenCalledWith();
     expect(req.user).toBeDefined();
@@ -36,7 +36,7 @@ describe('authMiddleware', () => {
     const res = {} as any;
     const next = vi.fn();
 
-    authMiddleware(req, res, next);
+    authMiddleware()(req, res, next);
 
     expect(next).toHaveBeenCalledWith(
       expect.objectContaining({ statusCode: 401 })
@@ -48,7 +48,7 @@ describe('authMiddleware', () => {
     const res = {} as any;
     const next = vi.fn();
 
-    authMiddleware(req, res, next);
+    authMiddleware()(req, res, next);
 
     expect(next).toHaveBeenCalledWith(
       expect.objectContaining({ statusCode: 401 })
@@ -66,10 +66,79 @@ describe('authMiddleware', () => {
     const res = {} as any;
     const next = vi.fn();
 
-    authMiddleware(req, res, next);
+    authMiddleware()(req, res, next);
 
     expect(next).toHaveBeenCalledWith(
       expect.objectContaining({ statusCode: 401 })
+    );
+  });
+
+  it('pasa con role admin requerido', () => {
+    const token = jwt.sign(
+      { id: 'user-1', email: 'test@test.com', role: 'admin' },
+      process.env.JWT_SECRET!,
+      { expiresIn: '1h' }
+    );
+
+    const req = { cookies: { auth_token: token } } as any;
+    const res = {} as any;
+    const next = vi.fn();
+
+    authMiddleware({ required: 'admin' })(req, res, next);
+
+    expect(next).toHaveBeenCalledWith();
+    expect(req.user?.role).toBe('admin');
+  });
+
+  it('rechaza con role admin requerido y role incorrecto', () => {
+    const token = jwt.sign(
+      { id: 'user-1', email: 'test@test.com', role: 'user' },
+      process.env.JWT_SECRET!,
+      { expiresIn: '1h' }
+    );
+
+    const req = { cookies: { auth_token: token } } as any;
+    const res = {} as any;
+    const next = vi.fn();
+
+    authMiddleware({ required: 'admin' })(req, res, next);
+
+    expect(next).toHaveBeenCalledWith(
+      expect.objectContaining({ statusCode: 403 })
+    );
+  });
+
+  it('pasa con role permitido en allowed', () => {
+    const token = jwt.sign(
+      { id: 'user-1', email: 'test@test.com', role: 'admin' },
+      process.env.JWT_SECRET!,
+      { expiresIn: '1h' }
+    );
+
+    const req = { cookies: { auth_token: token } } as any;
+    const res = {} as any;
+    const next = vi.fn();
+
+    authMiddleware({ allowed: ['admin', 'user'] })(req, res, next);
+
+    expect(next).toHaveBeenCalledWith();
+  });
+
+  it('rechaza con allowed y role no incluido', () => {
+    const token = jwt.sign(
+      { id: 'user-1', email: 'test@test.com', role: 'guest' },
+      process.env.JWT_SECRET!,
+      { expiresIn: '1h' }
+    );
+
+    const req = { cookies: { auth_token: token } } as any;
+    const res = {} as any;
+    const next = vi.fn();
+
+    authMiddleware({ allowed: ['admin', 'user'] })(req, res, next);
+
+    expect(next).toHaveBeenCalledWith(
+      expect.objectContaining({ statusCode: 403 })
     );
   });
 });
