@@ -51,6 +51,9 @@ Sistema de gestión de inventario para tiendas electrónicas. Dashboard con mét
 - **Dashboard interactivo** con 4 gráficos (tendencias, distribución por categoría, stock, entradas/salidas)
 - **Métricas en tiempo real**: proveedores activos, stock bajo, unidades en inventario, valor total del inventario
 - **Autenticación JWT** con cookies httpOnly y protección CSRF
+- **Autorización basada en roles (RBAC)** — el modelo `User` incluye el campo `role` (por defecto "admin"). Se incluyen middlewares para proteger rutas por rol:
+  - Cualquier usuario autenticado puede leer datos (listado de proveedores, productos, movimientos, dashboard)
+  - Solo usuarios con `role: "admin"` pueden crear/editar/eliminar proveedores, productos y movimientos de stock
 - **CRUD completo** de Proveedores y Productos
 - **Movimientos de stock** con transacciones ACID y aislamiento serializable
 - **Imágenes de productos** con subida a Cloudinary y soporte de URL externa
@@ -157,6 +160,25 @@ prisma.$transaction(async (tx) => {
 - **Validación Zod** en todos los inputs del backend
 - **Password hashing** con bcrypt (mínimo 8 caracteres)
 - **Variables de entorno** validadas al inicio del servidor
+
+## Autorización por Roles (RBAC)
+
+El modelo `User` incluye un campo `role` (String, valor por defecto `"admin"`). Se implementaron middlewares en `src/middlewares/auth.ts` que permiten:
+
+- **Lecturas abiertas**: Cualquier usuario autenticado puede acceder a listados y datos consultas (proveedores, productos, movimientos, dashboard)
+- ** Escrituras protegidas**: Solo usuarios con `role: "admin"` pueden crear, editar o eliminar registros
+
+Los middlewares están disponibles como `authMiddleware({ required: 'admin' })` o `authMiddleware({ allowed: ['admin', 'user'] })` y se aplican en las routes correspondientes.
+
+Ejemplo en routes:
+
+```typescript
+// Rutas abiertas (cualquier usuario autenticado)
+router.get('/', validate(listSuppliersSchema), controller.findAll);
+
+// Rutas de solo admin
+router.post('/', authMiddleware({ required: 'admin' }), validate(createSupplierSchema), controller.create);
+```
 
 ## Imágenes de Productos
 
