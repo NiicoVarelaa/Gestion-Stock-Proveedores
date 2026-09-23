@@ -16,6 +16,7 @@ const controller = new ProductController();
 // Rutas públicas: listar y ver producto
 router.get('/', validate(listProductsSchema), controller.findAll.bind(controller));
 router.get('/low-stock', controller.getLowStock.bind(controller));
+router.get('/csv', authMiddleware({ required: 'admin' }), controller.exportCsv.bind(controller));
 router.get('/:id', validate(getProductSchema), controller.findById.bind(controller));
 
 // Rutas de solo admin: crear, editar, eliminar, upload imagen

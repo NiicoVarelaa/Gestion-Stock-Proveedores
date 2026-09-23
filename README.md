@@ -63,6 +63,8 @@ Sistema de gestión de inventario para tiendas electrónicas. Dashboard con mét
 - **Seed de datos** realistas para demo (30 productos, 8 proveedores, 100+ movimientos, 1 admin)
 - **Paginación persistente** que mantiene la página actual tras mutaciones
 - **Recuperación de contraseña** con código por email (Gmail SMTP, expiración 10 min)
+- **Documentación OpenAPI (Swagger UI)** disponible en `/api/docs`
+- **Export a CSV** de proveedores (`/api/suppliers/csv`), productos (`/api/products/csv`) y movimientos (`/api/stock-movements/csv`)
 - **UX/UI mejorado**: iconos en formularios, tooltips, indicadores de paso, bordes de color en métricas
 
 ## Tech Stack
@@ -131,6 +133,18 @@ pnpm run dev
 | GET | `/api/auth/me` | Obtener usuario actual |
 | POST | `/api/auth/logout` | Cerrar sesión |
 | PATCH | `/api/products/:id/image` | Actualizar imagen de producto |
+| GET | `/api/docs` | Documentación OpenAPI / Swagger UI |
+| GET | `/api/suppliers/csv` | Exportar proveedores a CSV (admin) |
+| GET | `/api/products/csv` | Exportar productos a CSV (admin) |
+| GET | `/api/stock-movements/csv` | Exportar movimientos a CSV (admin) |
+
+## Documentación de la API
+
+La API está documentada con **OpenAPI 3.0** y expuesta con **Swagger UI**:
+
+- **Local:** `http://localhost:3000/api/docs`
+- Cada endpoint tiene su schema de entrada/salida, tags y requisitos de rol
+- Incluye botón "Authorize" para probar endpoints con la cookie de sesión
 
 ## Transacciones ACID
 

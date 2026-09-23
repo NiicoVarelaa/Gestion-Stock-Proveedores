@@ -26,6 +26,23 @@ export class SupplierService {
     return { data, total, page, limit };
   }
 
+  async findAllForExport(search?: string) {
+    const where = search
+      ? {
+          OR: [
+            { name: { contains: search, mode: 'insensitive' as const } },
+            { email: { contains: search, mode: 'insensitive' as const } },
+          ],
+        }
+      : {};
+
+    return prisma.supplier.findMany({
+      where,
+      include: { _count: { select: { products: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   async findById(id: string) {
     const supplier = await prisma.supplier.findUnique({
       where: { id },

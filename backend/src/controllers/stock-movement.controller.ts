@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { StockMovementService } from '../services/stock-movement.service';
+import { toCsv } from '../utils/csv';
 
 const movementService = new StockMovementService();
 
@@ -41,6 +42,38 @@ export class StockMovementController {
     try {
       const movement = await movementService.findById(req.params.id as string);
       res.json({ success: true, data: movement });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async exportCsv(req: Request, res: Response, next: NextFunction) {
+    try {
+      const productId = getQueryParam(req.query, 'productId');
+      const type = getQueryParam(req.query, 'type') as 'IN' | 'OUT' | undefined;
+      const from = getQueryParam(req.query, 'from');
+      const to = getQueryParam(req.query, 'to');
+      const supplierId = getQueryParam(req.query, 'supplierId');
+      const category = getQueryParam(req.query, 'category');
+      const movements = await movementService.findAllForExport({ productId, type, from, to, supplierId, category });
+
+      const csv = toCsv(
+        [
+          { header: 'id', value: (r) => r.id },
+          { header: 'type', value: (r) => r.type },
+          { header: 'quantity', value: (r) => r.quantity },
+          { header: 'reason', value: (r) => r.reason },
+          { header: 'productId', value: (r) => r.productId },
+          { header: 'productName', value: (r) => (r as { product: { name: string } }).product?.name ?? '' },
+          { header: 'productCategory', value: (r) => (r as { product: { category: string } }).product?.category ?? '' },
+          { header: 'createdAt', value: (r) => `${(r as { createdAt: Date }).createdAt.toISOString()}` },
+        ],
+        movements as unknown as Record<string, unknown>[]
+      );
+
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="movements-${Date.now()}.csv"`);
+      res.send(csv);
     } catch (error) {
       next(error);
     }

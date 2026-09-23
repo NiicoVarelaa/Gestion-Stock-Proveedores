@@ -14,6 +14,7 @@ const controller = new SupplierController();
 
 // Rutas públicas: listar y ver un proveedor
 router.get('/', validate(listSuppliersSchema), controller.findAll.bind(controller));
+router.get('/csv', authMiddleware({ required: 'admin' }), controller.exportCsv.bind(controller));
 router.get('/:id', validate(getSupplierSchema), controller.findById.bind(controller));
 
 // Rutas de solo admin: crear, editar, desactivar

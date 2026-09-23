@@ -86,6 +86,39 @@ export class StockMovementService {
     return { data, total, page, limit };
   }
 
+  async findAllForExport(filters: {
+    productId?: string;
+    type?: 'IN' | 'OUT';
+    from?: string;
+    to?: string;
+    supplierId?: string;
+    category?: string;
+  } = {}) {
+    const where: Record<string, unknown> = {};
+
+    if (filters.productId) where.productId = filters.productId;
+    if (filters.type) where.type = filters.type;
+    if (filters.from || filters.to) {
+      const dateFilter: Record<string, Date> = {};
+      if (filters.from) dateFilter.gte = new Date(filters.from);
+      if (filters.to) dateFilter.lte = new Date(filters.to);
+      where.createdAt = dateFilter;
+    }
+
+    const productFilter: Record<string, unknown> = {};
+    if (filters.supplierId) productFilter.supplierId = filters.supplierId;
+    if (filters.category) productFilter.category = filters.category;
+    if (Object.keys(productFilter).length > 0) {
+      where.product = productFilter;
+    }
+
+    return prisma.stockMovement.findMany({
+      where,
+      include: { product: { select: { id: true, name: true, category: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   async findById(id: string) {
     const movement = await prisma.stockMovement.findUnique({
       where: { id },

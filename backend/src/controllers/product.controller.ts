@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { ProductService } from '../services/product.service';
+import { toCsv } from '../utils/csv';
 
 const productService = new ProductService();
 
@@ -77,6 +78,37 @@ export class ProductController {
     try {
       const products = await productService.getLowStock();
       res.json({ success: true, data: products });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async exportCsv(req: Request, res: Response, next: NextFunction) {
+    try {
+      const category = getQueryParam(req.query, 'category');
+      const supplierId = getQueryParam(req.query, 'supplierId');
+      const search = getQueryParam(req.query, 'search');
+      const products = await productService.findAllForExport({ category, supplierId, search });
+
+      const csv = toCsv(
+        [
+          { header: 'id', value: (r) => r.id },
+          { header: 'name', value: (r) => r.name },
+          { header: 'category', value: (r) => r.category },
+          { header: 'price', value: (r) => (r as Record<string, unknown>).price },
+          { header: 'stock', value: (r) => r.stock },
+          { header: 'minStock', value: (r) => r.minStock },
+          { header: 'supplierId', value: (r) => r.supplierId },
+          { header: 'supplierName', value: (r) => (r as { supplier: { name: string } }).supplier?.name ?? '' },
+          { header: 'imageUrl', value: (r) => r.imageUrl },
+          { header: 'createdAt', value: (r) => `${(r as { createdAt: Date }).createdAt.toISOString()}` },
+        ],
+        products as unknown as Record<string, unknown>[]
+      );
+
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="products-${Date.now()}.csv"`);
+      res.send(csv);
     } catch (error) {
       next(error);
     }

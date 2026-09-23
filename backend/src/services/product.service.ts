@@ -76,6 +76,25 @@ export class ProductService {
     return { data, total, page, limit };
   }
 
+  async findAllForExport(filters: { category?: string; supplierId?: string; search?: string } = {}) {
+    const where: Record<string, unknown> = {};
+
+    if (filters.category) where.category = filters.category;
+    if (filters.supplierId) where.supplierId = filters.supplierId;
+    if (filters.search) {
+      where.OR = [
+        { name: { contains: filters.search, mode: 'insensitive' as const } },
+        { category: { contains: filters.search, mode: 'insensitive' as const } },
+      ];
+    }
+
+    return prisma.product.findMany({
+      where,
+      include: { supplier: { select: { id: true, name: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   async findById(id: string) {
     const product = await prisma.product.findUnique({
       where: { id },

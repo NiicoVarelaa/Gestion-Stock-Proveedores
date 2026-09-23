@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { SupplierService } from '../services/supplier.service';
+import { toCsv } from '../utils/csv';
 
 const supplierService = new SupplierService();
 
@@ -54,6 +55,33 @@ export class SupplierController {
     try {
       const supplier = await supplierService.deactivate(req.params.id as string);
       res.json({ success: true, data: supplier });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async exportCsv(req: Request, res: Response, next: NextFunction) {
+    try {
+      const search = getQueryParam(req.query, 'search');
+      const suppliers = await supplierService.findAllForExport(search);
+
+      const csv = toCsv(
+        [
+          { header: 'id', value: (r) => r.id },
+          { header: 'name', value: (r) => r.name },
+          { header: 'email', value: (r) => r.email },
+          { header: 'phone', value: (r) => r.phone },
+          { header: 'address', value: (r) => r.address },
+          { header: 'active', value: (r) => r.active },
+          { header: 'productCount', value: (r) => (r as { _count: { products: number } })._count?.products ?? 0 },
+          { header: 'createdAt', value: (r) => `${(r as { createdAt: Date }).createdAt.toISOString()}` },
+        ],
+        suppliers as unknown as Record<string, unknown>[]
+      );
+
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="suppliers-${Date.now()}.csv"`);
+      res.send(csv);
     } catch (error) {
       next(error);
     }
