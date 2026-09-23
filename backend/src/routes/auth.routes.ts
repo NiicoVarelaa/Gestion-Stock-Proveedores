@@ -11,6 +11,6 @@ const controller = new AuthController();
 router.post('/register', authLimiter, validate(registerSchema), controller.register.bind(controller));
 router.post('/login', authLimiter, validate(loginSchema), controller.login.bind(controller));
 router.post('/logout', controller.logout.bind(controller));
-router.get('/me', authMiddleware, controller.me.bind(controller));
+router.get('/me', authMiddleware(), controller.me.bind(controller));
 
 export default router;

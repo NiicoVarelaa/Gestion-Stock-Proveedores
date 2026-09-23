@@ -36,10 +36,10 @@ app.use(cookieParser());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/auth', passwordResetRoutes);
-app.use('/api/suppliers', authMiddleware, supplierRoutes);
-app.use('/api/products', authMiddleware, productRoutes);
-app.use('/api/stock-movements', authMiddleware, stockMovementRoutes);
-app.use('/api/dashboard', authMiddleware, dashboardRoutes);
+app.use('/api/suppliers', authMiddleware(), supplierRoutes);
+app.use('/api/products', authMiddleware(), productRoutes);
+app.use('/api/stock-movements', authMiddleware(), stockMovementRoutes);
+app.use('/api/dashboard', authMiddleware(), dashboardRoutes);
 
 app.use((req, res) => {
   res.status(404).json({
