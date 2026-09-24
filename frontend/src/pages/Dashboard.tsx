@@ -1,9 +1,9 @@
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { useProductStore } from '@/store/product.store';
-import { useMovementStore } from '@/store/movement.store';
-import { useSupplierStore } from '@/store/supplier.store';
-import { useDashboardStore } from '@/store/dashboard.store';
+import { useLowStock } from '@/hooks/useProducts';
+import { useMovements } from '@/hooks/useMovements';
+import { useSuppliers } from '@/hooks/useSuppliers';
+import { useDashboardMetrics } from '@/hooks/useDashboard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, Truck, ArrowUpRight, ArrowDownRight, Package, DollarSign, TrendingUp, ArrowRight } from 'lucide-react';
@@ -50,17 +50,14 @@ function SkeletonCard() {
 }
 
 export default function Dashboard() {
-  const { lowStock, loading: loadingProducts, fetchLowStock } = useProductStore();
-  const { movements, loading: loadingMovements, fetchMovements } = useMovementStore();
-  const { suppliers, loading: loadingSuppliers, fetchSuppliers } = useSupplierStore();
-  const { metrics, loading: loadingMetrics, fetchMetrics } = useDashboardStore();
+  const { data: lowStockData, isLoading: loadingProducts } = useLowStock();
+  const { data: movementsData, isLoading: loadingMovements } = useMovements({ limit: 5 });
+  const { data: suppliersData, isLoading: loadingSuppliers } = useSuppliers({ limit: 100 });
+  const { data: metrics, isLoading: loadingMetrics } = useDashboardMetrics();
 
-  useEffect(() => {
-    fetchLowStock();
-    fetchMovements({ limit: 5 });
-    fetchSuppliers({ limit: 100 });
-    fetchMetrics();
-  }, []);
+  const lowStock = lowStockData ?? [];
+  const movements = movementsData?.movements ?? [];
+  const suppliers = suppliersData?.suppliers ?? [];
 
   const isLoading = loadingProducts || loadingMovements || loadingSuppliers || loadingMetrics;
 

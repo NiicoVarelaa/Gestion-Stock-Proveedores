@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useMovementStore } from '@/store/movement.store';
-import { useProductStore } from '@/store/product.store';
-import { useSupplierStore } from '@/store/supplier.store';
+import { useMovements, useCreateMovement } from '@/hooks/useMovements';
+import { useProducts } from '@/hooks/useProducts';
+import { useSuppliers } from '@/hooks/useSuppliers';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -71,15 +71,27 @@ function TableSkeleton() {
 }
 
 export default function MovementsPage() {
-  const { movements, total, loading, fetchMovements, createMovement } = useMovementStore();
-  const { products, fetchProducts } = useProductStore();
-  const { suppliers, fetchSuppliers } = useSupplierStore();
   const [open, setOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [typeFilter, setTypeFilter] = useState<string | undefined>(undefined);
   const [supplierFilter, setSupplierFilter] = useState<string | undefined>(undefined);
   const [categoryFilter, setCategoryFilter] = useState<string | undefined>(undefined);
   const limit = 10;
+
+  const { data, isLoading } = useMovements({
+    page,
+    limit,
+    type: (typeFilter as 'IN' | 'OUT') || undefined,
+    supplierId: supplierFilter || undefined,
+    category: categoryFilter || undefined,
+  });
+  const createMovementMutation = useCreateMovement();
+  const { data: productsData } = useProducts({ limit: 100 });
+  const { data: suppliersData } = useSuppliers({ limit: 100 });
+  const movements = data?.movements ?? [];
+  const total = data?.total ?? 0;
+  const products = productsData?.products ?? [];
+  const suppliers = suppliersData?.suppliers ?? [];
 
   const categories = [...new Set(products.map((p) => p.category))].sort();
 
@@ -88,32 +100,12 @@ export default function MovementsPage() {
     defaultValues: { type: 'IN', quantity: 1, productId: '', reason: '' },
   });
 
-  const loadData = () => {
-    fetchMovements({
-      page,
-      limit,
-      type: (typeFilter as 'IN' | 'OUT') || undefined,
-      supplierId: supplierFilter || undefined,
-      category: categoryFilter || undefined,
-    });
-  };
-
-  useEffect(() => {
-    loadData();
-  }, [page, typeFilter, supplierFilter, categoryFilter]);
-
-  useEffect(() => {
-    fetchProducts({ limit: 100 });
-    fetchSuppliers({ limit: 100 });
-  }, []);
-
   const onSubmit = async (data: FormData) => {
     try {
-      await createMovement(data);
+      await createMovementMutation.mutateAsync(data);
       toast.success('Movimiento registrado');
       setOpen(false);
       form.reset({ type: 'IN', quantity: 1, productId: '', reason: '' });
-      loadData();
     } catch {
       toast.error('Error al registrar movimiento');
     }
@@ -190,7 +182,7 @@ export default function MovementsPage() {
                 <Label>Motivo (opcional)</Label>
                 <Input {...form.register('reason')} />
               </div>
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button type="submit" className="w-full" disabled={createMovementMutation.isPending}>
                 Registrar
               </Button>
             </form>
@@ -255,8 +247,8 @@ export default function MovementsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {loading ? (
-              <TableSkeleton />
+{isLoading ? (
+            <TableSkeleton />
             ) : movements.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="text-center text-gray-500 py-8">
@@ -293,7 +285,7 @@ export default function MovementsPage() {
 
       {/* Mobile cards */}
       <div className="block md:hidden space-y-3">
-        {loading ? (
+        {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="rounded-lg border p-4 space-y-3">
               <div className="h-5 w-40 bg-gray-200 rounded animate-pulse" />

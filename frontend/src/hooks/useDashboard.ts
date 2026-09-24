@@ -1,5 +1,6 @@
-import { create } from 'zustand';
+import { useQuery } from '@tanstack/react-query';
 import api from '@/services/api';
+import { queryKeys } from '@/lib/queryKeys';
 
 export interface DashboardMetrics {
   totalProducts: number;
@@ -23,27 +24,13 @@ export interface DashboardMetrics {
   }[];
 }
 
-interface DashboardStore {
-  metrics: DashboardMetrics | null;
-  loading: boolean;
-  error: string | null;
-  fetchMetrics: () => Promise<void>;
-}
-
-export const useDashboardStore = create<DashboardStore>((set) => ({
-  metrics: null,
-  loading: false,
-  error: null,
-
-  fetchMetrics: async () => {
-    set({ loading: true, error: null });
-    try {
+export function useDashboardMetrics() {
+  return useQuery({
+    queryKey: queryKeys.dashboard.metrics,
+    queryFn: async () => {
       const { data } = await api.get('/dashboard/metrics');
-      set({ metrics: data.data });
-    } catch {
-      set({ error: 'Error al cargar métricas del dashboard' });
-    } finally {
-      set({ loading: false });
-    }
-  },
-}));
+      return (data.data || null) as DashboardMetrics | null;
+    },
+    staleTime: 60_000,
+  });
+}

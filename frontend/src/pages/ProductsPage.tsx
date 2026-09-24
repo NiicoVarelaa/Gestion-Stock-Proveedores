@@ -1,9 +1,9 @@
-import { useEffect, useState, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useProductStore } from '@/store/product.store';
-import { useSupplierStore } from '@/store/supplier.store';
+import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct } from '@/hooks/useProducts';
+import { useSuppliers } from '@/hooks/useSuppliers';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -75,8 +75,6 @@ function TableSkeleton() {
 }
 
 export default function ProductsPage() {
-  const { products, total, loading, fetchProducts, fetchLowStock, createProduct, updateProduct, deleteProduct } = useProductStore();
-  const { suppliers, fetchSuppliers } = useSupplierStore();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Product | null>(null);
   const [page, setPage] = useState(1);
@@ -86,6 +84,16 @@ export default function ProductsPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const limit = 10;
+
+  const { data: productsData, isLoading } = useProducts({ page, limit, search: search || undefined, category: category || undefined });
+  const { data: suppliersData } = useSuppliers({ limit: 100 });
+  const createProductMutation = useCreateProduct();
+  const updateProductMutation = useUpdateProduct();
+  const deleteProductMutation = useDeleteProduct();
+  const products = useMemo(() => productsData?.products ?? [], [productsData]);
+  const total = productsData?.total ?? 0;
+  const suppliers = suppliersData?.suppliers ?? [];
+  const mutating = createProductMutation.isPending || updateProductMutation.isPending || deleteProductMutation.isPending;
 
   const form = useForm<FormData>({
     resolver: zodResolver(productSchema),
@@ -97,24 +105,6 @@ export default function ProductsPage() {
     () => [...new Set(products.map((p) => p.category))].sort(),
     [products]
   );
-
-  const loadData = () => {
-    fetchProducts({
-      page,
-      limit,
-      search: search || undefined,
-      category: category || undefined,
-    });
-  };
-
-  useEffect(() => {
-    loadData();
-  }, [page, search, category]);
-
-  useEffect(() => {
-    fetchLowStock();
-    fetchSuppliers({ limit: 100 });
-  }, []);
 
   const handleOpen = (product?: Product) => {
     setSelectedFile(null);
@@ -153,16 +143,15 @@ export default function ProductsPage() {
   const onSubmit = async (data: FormData) => {
     try {
       if (editing) {
-        await updateProduct(editing.id, { ...data, image: selectedFile });
+        await updateProductMutation.mutateAsync({ id: editing.id, data: { ...data, image: selectedFile } });
         toast.success('Producto actualizado');
       } else {
-        await createProduct({ ...data, image: selectedFile });
+        await createProductMutation.mutateAsync({ ...data, image: selectedFile });
         toast.success('Producto creado');
       }
       setOpen(false);
       setSelectedFile(null);
       setPreviewUrl(null);
-      loadData();
     } catch {
       toast.error('Error al guardar producto');
     }
@@ -171,9 +160,8 @@ export default function ProductsPage() {
   const handleDelete = async (id: string) => {
     if (!window.confirm('¿Estás seguro de que deseas eliminar este producto?')) return;
     try {
-      await deleteProduct(id);
+      await deleteProductMutation.mutateAsync(id);
       toast.success('Producto eliminado');
-      loadData();
     } catch {
       toast.error('Error al eliminar producto');
     }
@@ -281,7 +269,7 @@ export default function ProductsPage() {
                 </Select>
                 <FormFieldError error={form.formState.errors.supplierId} />
               </div>
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button type="submit" className="w-full" disabled={mutating}>
                 {editing ? 'Actualizar' : 'Crear'}
               </Button>
             </form>
@@ -326,7 +314,7 @@ export default function ProductsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {loading ? (
+            {isLoading ? (
               <TableSkeleton />
             ) : products.length === 0 ? (
               <TableRow>
@@ -375,7 +363,7 @@ export default function ProductsPage() {
 
       {/* Mobile cards */}
       <div className="block md:hidden space-y-3">
-        {loading ? (
+        {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="rounded-lg border p-4 space-y-3">
               <div className="flex items-center gap-3">

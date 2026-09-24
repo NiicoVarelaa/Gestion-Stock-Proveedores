@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useSupplierStore } from '@/store/supplier.store';
+import { useSuppliers, useCreateSupplier, useUpdateSupplier, useDeactivateSupplier } from '@/hooks/useSuppliers';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -56,28 +56,25 @@ function TableSkeleton() {
 }
 
 export default function SuppliersPage() {
-  const { suppliers, loading, fetchSuppliers, createSupplier, updateSupplier, deactivateSupplier } = useSupplierStore();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Supplier | null>(null);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
-  const [total, setTotal] = useState(0);
   const limit = 10;
+
+  const { data, isLoading } = useSuppliers({ page, limit, search: search || undefined });
+  const createSupplierMutation = useCreateSupplier();
+  const updateSupplierMutation = useUpdateSupplier();
+  const deactivateSupplierMutation = useDeactivateSupplier();
+
+  const suppliers = data?.suppliers ?? [];
+  const total = data?.total ?? 0;
+  const mutating = createSupplierMutation.isPending || updateSupplierMutation.isPending || deactivateSupplierMutation.isPending;
 
   const form = useForm<FormData>({
     resolver: zodResolver(supplierSchema),
     defaultValues: { name: '', email: '', phone: '', address: '' },
   });
-
-  const loadData = () => {
-    fetchSuppliers({ page, limit, search: search || undefined }).then((res) => {
-      if (res?.total !== undefined) setTotal(res.total);
-    });
-  };
-
-  useEffect(() => {
-    loadData();
-  }, [page, search]);
 
   const handleOpen = (supplier?: Supplier) => {
     if (supplier) {
@@ -93,14 +90,13 @@ export default function SuppliersPage() {
   const onSubmit = async (data: FormData) => {
     try {
       if (editing) {
-        await updateSupplier(editing.id, data);
+        await updateSupplierMutation.mutateAsync({ id: editing.id, data });
         toast.success('Proveedor actualizado');
       } else {
-        await createSupplier(data);
+        await createSupplierMutation.mutateAsync(data);
         toast.success('Proveedor creado');
       }
       setOpen(false);
-      loadData();
     } catch {
       toast.error('Error al guardar proveedor');
     }
@@ -109,9 +105,8 @@ export default function SuppliersPage() {
   const handleDeactivate = async (id: string) => {
     if (!window.confirm('¿Estás seguro de que deseas desactivar este proveedor?')) return;
     try {
-      await deactivateSupplier(id);
+      await deactivateSupplierMutation.mutateAsync(id);
       toast.success('Proveedor desactivado');
-      loadData();
     } catch {
       toast.error('Error al desactivar proveedor');
     }
@@ -162,7 +157,7 @@ export default function SuppliersPage() {
                   <Input {...form.register('address')} placeholder="Av. Corrientes 1234, CABA" className="pl-10" />
                 </div>
               </div>
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button type="submit" className="w-full" disabled={mutating}>
                 {editing ? 'Actualizar' : 'Crear'}
               </Button>
             </form>
@@ -193,7 +188,7 @@ export default function SuppliersPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {loading ? (
+            {isLoading ? (
               <TableSkeleton />
             ) : suppliers.length === 0 ? (
               <TableRow>
@@ -244,7 +239,7 @@ export default function SuppliersPage() {
 
       {/* Mobile cards */}
       <div className="block md:hidden space-y-3">
-        {loading ? (
+        {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="rounded-lg border p-4 space-y-3">
               <div className="h-5 w-32 bg-gray-200 rounded animate-pulse" />

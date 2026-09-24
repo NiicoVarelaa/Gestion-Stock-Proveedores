@@ -76,7 +76,8 @@ Sistema de gestión de inventario para tiendas electrónicas. Dashboard con mét
 | ORM | Prisma |
 | Validation | Zod |
 | Frontend | React 19, Vite, Tailwind, Shadcn UI |
-| State | Zustand |
+| Server State | TanStack Query |
+| Client State | Zustand (auth, tema) |
 | Forms | React Hook Form + Zod |
 | Charts | Chart.js + react-chartjs-2 |
 | Notifications | Sonner |
@@ -237,9 +238,10 @@ mini-erp/
 │       ├── components/      # Reusable UI (Shadcn + custom)
 │       ├── pages/           # Page components
 │       ├── services/        # API client with interceptors
-│       ├── store/           # Zustand stores
+│       ├── hooks/           # TanStack Query hooks (server state)
+│       ├── store/           # Zustand stores (auth, tema)
 │       ├── types/           # TypeScript types
-│       └── lib/             # Utilities
+│       └── lib/             # Utilities (query keys, etc.)
 └── README.md
 ```
 

@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import SuppliersPage from './SuppliersPage';
-import { useSupplierStore } from '@/store/supplier.store';
 
 vi.mock('@/services/api', () => ({
   default: {
@@ -15,36 +15,37 @@ vi.mock('@/services/api', () => ({
   },
 }));
 
+let queryClient: QueryClient;
+
 beforeEach(() => {
   vi.clearAllMocks();
-  useSupplierStore.setState({ suppliers: [], total: 0, loading: false, error: null });
+  queryClient = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
 });
 
-describe('SuppliersPage', () => {
-  it('renderiza el título', () => {
-    render(
+const renderPage = () =>
+  render(
+    <QueryClientProvider client={queryClient}>
       <MemoryRouter>
         <TooltipProvider><SuppliersPage /></TooltipProvider>
       </MemoryRouter>
-    );
+    </QueryClientProvider>
+  );
+
+describe('SuppliersPage', () => {
+  it('renderiza el título', () => {
+    renderPage();
     expect(screen.getByText('Proveedores')).toBeInTheDocument();
   });
 
   it('muestra el botón de nuevo proveedor', () => {
-    render(
-      <MemoryRouter>
-        <TooltipProvider><SuppliersPage /></TooltipProvider>
-      </MemoryRouter>
-    );
+    renderPage();
     expect(screen.getByText('Nuevo Proveedor')).toBeInTheDocument();
   });
 
   it('muestra campo de búsqueda', () => {
-    render(
-      <MemoryRouter>
-        <TooltipProvider><SuppliersPage /></TooltipProvider>
-      </MemoryRouter>
-    );
+    renderPage();
     expect(screen.getByPlaceholderText('Buscar por nombre o email...')).toBeInTheDocument();
   });
 });
