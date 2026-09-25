@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct } from '@/hooks/useProducts';
@@ -100,6 +100,7 @@ export default function ProductsPage() {
     defaultValues: { name: '', category: '', price: undefined as unknown as number, minStock: 5, supplierId: '' },
     mode: 'onSubmit',
   });
+  const watchedSupplierId = useWatch({ control: form.control, name: 'supplierId' });
 
   const categories = useMemo(
     () => [...new Set(products.map((p) => p.category))].sort(),
@@ -251,7 +252,7 @@ export default function ProductsPage() {
               <div className="space-y-2">
                 <Label>Proveedor</Label>
                 <Select
-                  value={form.watch('supplierId')}
+                  value={watchedSupplierId}
                   onValueChange={(value: string) => form.setValue('supplierId', value)}
                 >
                   <SelectTrigger>

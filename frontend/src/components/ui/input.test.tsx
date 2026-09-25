@@ -22,8 +22,7 @@ describe('Input', () => {
     expect(input).toHaveAttribute('type', 'password');
   });
 
-  it('no permite escribir cuando está deshabilitado', async () => {
-    const user = userEvent.setup();
+  it('no permite escribir cuando está deshabilitado', () => {
     render(<Input disabled />);
     const input = screen.getByRole('textbox');
     expect(input).toBeDisabled();

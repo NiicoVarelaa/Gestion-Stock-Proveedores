@@ -1,18 +1,15 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-
-type Theme = 'light' | 'dark' | 'system';
-
-interface ThemeContextType {
-  theme: Theme;
-  resolvedTheme: 'light' | 'dark';
-  setTheme: (theme: Theme) => void;
-}
-
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+import { useEffect, useState, useSyncExternalStore, type ReactNode } from 'react';
+import { ThemeContext, type Theme } from './theme-context';
 
 function getSystemTheme(): 'light' | 'dark' {
   if (typeof window === 'undefined') return 'light';
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+function subscribe(callback: () => void) {
+  const mq = window.matchMedia('(prefers-color-scheme: dark)');
+  mq.addEventListener('change', callback);
+  return () => mq.removeEventListener('change', callback);
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
@@ -21,28 +18,14 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return (localStorage.getItem('theme') as Theme) || 'system';
   });
 
-  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>(() => {
-    if (theme === 'system') return getSystemTheme();
-    return theme;
-  });
+  const systemTheme = useSyncExternalStore<'light' | 'dark'>(subscribe, getSystemTheme, () => 'light');
+  const resolvedTheme: 'light' | 'dark' = theme === 'system' ? systemTheme : theme;
 
   useEffect(() => {
     const root = document.documentElement;
     root.classList.remove('light', 'dark');
     root.classList.add(resolvedTheme);
   }, [resolvedTheme]);
-
-  useEffect(() => {
-    if (theme === 'system') {
-      setResolvedTheme(getSystemTheme());
-      const mq = window.matchMedia('(prefers-color-scheme: dark)');
-      const handler = () => setResolvedTheme(getSystemTheme());
-      mq.addEventListener('change', handler);
-      return () => mq.removeEventListener('change', handler);
-    } else {
-      setResolvedTheme(theme);
-    }
-  }, [theme]);
 
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
@@ -54,10 +37,4 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       {children}
     </ThemeContext.Provider>
   );
-}
-
-export function useTheme() {
-  const context = useContext(ThemeContext);
-  if (!context) throw new Error('useTheme must be used within a ThemeProvider');
-  return context;
 }

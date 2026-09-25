@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMovements, useCreateMovement } from '@/hooks/useMovements';
@@ -112,6 +112,8 @@ export default function MovementsPage() {
   };
 
   const totalPages = Math.ceil(total / limit);
+  const watchedType = useWatch({ control: form.control, name: 'type' });
+  const watchedProductId = useWatch({ control: form.control, name: 'productId' });
 
   return (
     <div className="space-y-6">
@@ -132,7 +134,7 @@ export default function MovementsPage() {
               <div className="space-y-2">
                 <Label>Tipo</Label>
                 <Select
-                  value={form.watch('type')}
+                  value={watchedType}
                   onValueChange={(value: 'IN' | 'OUT') => form.setValue('type', value)}
                 >
                   <SelectTrigger>
@@ -157,7 +159,7 @@ export default function MovementsPage() {
               <div className="space-y-2">
                 <Label>Producto</Label>
                 <Select
-                  value={form.watch('productId')}
+                  value={watchedProductId}
                   onValueChange={(value: string) => form.setValue('productId', value)}
                 >
                   <SelectTrigger>

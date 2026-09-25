@@ -12,6 +12,15 @@ vi.mock('axios', () => ({
   },
 }));
 
+type LocationLike = Pick<Location, 'href'> & { assign?: never };
+
+const mockLocation = (href: string): void => {
+  Object.defineProperty(window, 'location', {
+    configurable: true,
+    value: { href } satisfies LocationLike,
+  });
+};
+
 describe('api', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -37,8 +46,7 @@ describe('api', () => {
 
     const errorHandler = mockInterceptorsUse.mock.calls[0][1];
 
-    delete (window as any).location;
-    (window as any).location = { href: '' };
+    mockLocation('');
 
     await expect(errorHandler({
       response: { status: 401 },
@@ -53,8 +61,7 @@ describe('api', () => {
 
     const errorHandler = mockInterceptorsUse.mock.calls[0][1];
 
-    delete (window as any).location;
-    (window as any).location = { href: '' };
+    mockLocation('');
 
     await expect(errorHandler({
       response: { status: 401 },
@@ -69,8 +76,7 @@ describe('api', () => {
 
     const errorHandler = mockInterceptorsUse.mock.calls[0][1];
 
-    delete (window as any).location;
-    (window as any).location = { href: '' };
+    mockLocation('');
 
     await expect(errorHandler({
       response: { status: 500 },
